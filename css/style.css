@@ -1,0 +1,98 @@
+body {
+    background-color: #FDF6E3;
+    margin: 0;
+    font-family: sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameFrame {
+    position: relative;
+    flex-shrink: 0;
+    max-width: 800px;
+    width: 60vw;
+    aspect-ratio: 800/569;
+    border-radius: 25px;
+    border: 1px solid #000;
+    background: #FFFEF9;
+}
+
+canvas {
+    display: block;
+    border-radius: 25px;
+    border: 1px solid #000;
+    z-index: 0;
+}
+
+#controlPanel {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: #503E28;
+    border-radius: 10px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#catToolbar {
+    display: flex;
+    gap: 8px;
+    background: #e9dbc7;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.catButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff3dd;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.catButton span {
+    font-size: 12px;
+    color: #333;
+}
+
+.catButton:hover {
+    background: #f2e6c7;
+}
+
+#gameProgressWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#gameProgress {
+    width: 100px;
+    height: 10px;
+}
+
+.Button {
+    background: #b8956f;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.Button:hover {
+    background: #a8845d;
+}

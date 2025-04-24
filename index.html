@@ -7,14 +7,36 @@
     <script src="js/p5.js"></script>
     <script src="js/p5.dom.min.js"></script>
     <script src="js/p5.sound.min.js"></script>
+    <script src="js/scenemanager.js"></script>
+    <!-- <script src='https://cdnjs.cloudflare.com/ajax/libs/p5play/3.26.5/p5play.js' integrity='sha512-/U7V9+DgHiG8HVEtlGUYBRudMHgNB05AtyKOG2e4BduF4XogG4inVXPvEI5NE/I7R28a8K7gAgI7msqIzzBt4Q==' crossorigin='anonymous'></script> -->
+
+    <script type="module" src="sketch.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
-<script defer src="sketch.js"></script>
+<!-- <script defer src="sketch.js"></script> -->
 
 <body>
+    <h1 id="title">Cats vs Mice</h1>
+    <div id="gameFrame">
+        <div id="controlPanel">
+            <div id="catToolbar">
+                <button class="catButton" id="cheeseButton">🧀<span>250</span></button>
+                <button class="catButton" id="chefButton">🧑‍🍳<span>50</span></button>
+                <button class="catButton" id="singleYarnButton">🧶<span>100</span></button>
+                <button class="catButton" id="doubleYarnButton">🧶🧶<span>200</span></button>
+                <button class="catButton" id="sleepyButton">💤<span>150</span></button>
+                <button class="catButton" id="iceButton">❄️<span>150</span></button>
+            </div>
 
-    
+            <div id="gameProgressWrapper">
+                <progress id="gameProgress" value="30" max="100"></progress>
+                <label>Game Progress</label>
+            </div>
+        </div>
+    </div>
+    <button class="Button" id="startButton">Start Game</button>
+    <button class="Button" id="menuButton">Menu</button>
 </body>
 </html>
