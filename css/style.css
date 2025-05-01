@@ -1,3 +1,11 @@
+:root {
+    --dark-brown: #503E28;
+    --med-brown: #B09472;
+    --light-brown: #CAB49A;
+    --dark-yellow: #F7E7BE;
+    --light-yellow: #FDF4E5;
+}
+
 body {
     background-color: #FDF6E3;
     margin: 0;
@@ -15,46 +23,77 @@ body {
     max-width: 800px;
     width: 60vw;
     aspect-ratio: 800/569;
-    border-radius: 25px;
-    border: 1px solid #000;
+    border-radius: 35px;
+    /* border: 10px solid #000; */
     background: #FFFEF9;
+    overflow: hidden;
 }
 
 canvas {
     display: block;
+    width: 100%;
+    height: 100%;
     border-radius: 25px;
-    border: 1px solid #000;
+    /* border: 1px solid #000; */
     z-index: 0;
 }
 
-#controlPanel {
+#upperContainer {
     position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
     gap: 16px;
     align-items: center;
-    background: #503E28;
-    border-radius: 10px;
-    padding: 12px 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: var(--med-brown);
+    border-radius: 25px 25px 0 0;
+}
+
+#controlPanel {
+    /* background: var(--light-brown); */
+    border-radius: 30px 30px 0 0;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+}
+
+#cheeseLabel {
+    margin-left: 20px;
+    width: 2.6%;
+}
+
+#cheeseDisplay {
+    background: var(--light-brown);
+    height: 100%;
+    width: auto;
+    aspect-ratio: 80/83;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.buttonIcon {
+    width: 60%
 }
 
 #catToolbar {
     display: flex;
-    gap: 8px;
-    background: #e9dbc7;
-    padding: 4px 8px;
+    flex-direction: row;
+    height: 100%;
+    width: 46%;
+    gap: 1px;
+    background: var(--light-brown);
+    /* padding: 4px 8px; */
     border-radius: 6px;
 }
 
 .catButton {
+    width: 20%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #fff3dd;
-    border: none;
+    background: var(--light-brown);
+    border: 1px solid var(--dark-brown);
     border-radius: 4px;
     padding: 4px 6px;
     font-size: 18px;
@@ -68,7 +107,29 @@ canvas {
 }
 
 .catButton:hover {
-    background: #f2e6c7;
+    background: var(--dark-yellow);
+}
+
+.catButton.activeButton {
+    background: red;
+}
+
+#petCage {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 66/83;
+}
+
+.catIcon {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.cheeseIcon {
+    width: 80%;
+    height: auto;
+    object-fit: contain;
 }
 
 #gameProgressWrapper {
@@ -82,8 +143,15 @@ canvas {
     height: 10px;
 }
 
+#gameBackground {
+    position: absolute;
+    translate: -50%;
+    width: 100%;
+    /* z-index: -1; */
+}
+
 .Button {
-    background: #b8956f;
+    background: var(--med-brown);
     color: white;
     border: none;
     padding: 6px 10px;
