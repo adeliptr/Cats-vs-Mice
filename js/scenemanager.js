@@ -69,8 +69,10 @@ function SceneManager(p)
                     hasSetup : "setup" in oScene,
                     hasEnter : "enter" in oScene,
                     hasDraw : "draw" in oScene,
+                    hasExit : "exit" in oScene,
                     setupExecuted : false,
-                    enterExecuted : false };
+                    enterExecuted : false
+                };
 
         this.scenes.push(o);
         return o;
@@ -117,6 +119,10 @@ function SceneManager(p)
         
         // Re-arm the enter function at each show of the scene
         o.enterExecuted = false;
+
+        if (this.scene && this.scene.hasExit) {
+            this.scene.oScene.exit();
+        }
 
         this.scene = o;
 
