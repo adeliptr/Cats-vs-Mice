@@ -112,8 +112,7 @@ export class ChefCat extends Cat {
     }
 
     action() {
-        // Produces 50 cheese every 10 seconds, cheese.png pop in front of the chefCat
-        // TODO: change it to 25 secs
+        // Produces 25 cheese every 10 seconds, cheese.png pop in front of the chefCat
         if (millis() - this.lastProduced > 10000) {
             console.log(`produces Cheese!`)
             const cheese = createSprite(this.x + this.width / 5, this.y + this.width / 5);
@@ -143,7 +142,11 @@ export class SingleYarnCat extends Cat {
             yarn.scale = gameFrame.tileWidth / 1024;
             yarn.vel.x = 1;
             yarn.life = 600;
-            movingObjects.push(yarn);
+            const newMovingObject = {
+                sprite: yarn,
+                point: 15
+            }
+            movingObjects.push(newMovingObject);
             this.lastShot = millis();
         }
     }
@@ -168,7 +171,11 @@ export class DoubleYarnCat extends Cat {
                 yarn.scale = gameFrame.tileWidth / 1024;
                 yarn.vel.x = 1;
                 yarn.life = 600;
-                movingObjects.push(yarn);
+                const newMovingObject = {
+                    sprite: yarn,
+                    point: 15
+                }
+                movingObjects.push(newMovingObject);
             }
             this.lastShot = millis();
         }
@@ -199,17 +206,6 @@ export class SleepyCat extends Cat {
             if (millis() - this.wakeStart > 1480) this.remove();
         }
     }
-
-    // action(mouse) {
-    //     if (this.awake) {
-    //         this.changeAni('action');
-    //         this.wakeStart = millis();
-    //     }
-    //     if (this.wakeStart && millis() - this.wakeStart > 1000) {
-    //         this.remove();
-    //         // Still needs to remove it from the activeCats or grid[row][col]
-    //     }
-    // }
 }
 
 export class IceCat extends Cat {
@@ -230,7 +226,11 @@ export class IceCat extends Cat {
             snowball.scale = gameFrame.tileWidth / 1024;
             snowball.vel.x = 1;
             snowball.life = 600;
-            movingObjects.push(snowball);
+            const newMovingObject = {
+                sprite: snowball,
+                point: 20
+            }
+            movingObjects.push(newMovingObject);
             this.lastShot = millis();
         }
     }

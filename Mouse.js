@@ -5,7 +5,7 @@ export class Mice {
     constructor(x, y, speed, HP, AP, img, width) {
         this.sprite = createSprite(x, y, width, width);
         this.sprite.image = img;
-        this.sprite.layer = 2;
+        this.sprite.layer = 3;
         this.sprite.velocity.x = speed;
         this.HP = HP;
         this.AP = AP;

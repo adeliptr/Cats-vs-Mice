@@ -3,6 +3,7 @@ import { imageAssets, catImages, catAnimation, selectedCatType, resetCatType } f
 import { Cat, ChefCat, SingleYarnCat, DoubleYarnCat, SleepyCat, IceCat } from './Cat.js';
 import { Mice, BasicMouse, HelmetMouse } from './Mouse.js';
 import { level1Mice } from './level/level1.js';
+import { RobotVacuum } from './RobotVacuum.js';
 
 const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');
@@ -83,10 +84,7 @@ export function GameScene() {
             let x = gameFrame.paddingRobot + gameFrame.robotSize / 2;
             let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
 
-            let vacuum = createSprite(x, y, gameFrame.robotSize, gameFrame.robotSize);
-            vacuum.image = imageAssets.robotVacuum;
-            vacuum.image.scale = gameFrame.tileWidth / 1000;
-            // vacuum.vel.x = 1;
+            let vacuum = new RobotVacuum(x, y, row);
 
             gameSprites.push(vacuum);
             robotVacuums.push(vacuum);
@@ -136,6 +134,12 @@ export function GameScene() {
                         cat.awake = true;
                         cat.action(currMouse);
                         activeMice[row].splice(i, 1);
+                    }
+                })
+
+                robotVacuums.forEach((vacuum) => {
+                    if (vacuum.sprite.overlaps(currMouse.sprite)) {
+                        vacuum.action();
                     }
                 })
             }

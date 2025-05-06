@@ -5,4 +5,6 @@ export const level1Mice = [
     { time: 23, type: 'basicMouse', row: 0 },
     { time: 30, type: 'basicMouse', row: 4 },
     { time: 36, type: 'helmetMouse', row: 1 },
+    { time: 45, type: 'basicMouse', row: 0},
+    { time: 55, type: 'basicMouse', row: 0}
 ]
