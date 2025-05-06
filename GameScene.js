@@ -1,13 +1,82 @@
 import { prototypeFrame, gameFrame } from './prototype.js';
 import { StartScene } from './StartScene.js';
+import { imageAssets, catImages, catAnimation, selectedCatType, resetCatType } from './sketch.js';
+import { Cat, ChefCat, SingleYarnCat, DoubleYarnCat, SleepyCat, IceCat } from './Cat.js'
 
 const gameParent = document.getElementById('gameFrame');
+const upperContainer = document.getElementById('upperContainer');
+const controlPanel = document.getElementById('controlPanel');
+const cheeseCount = document.getElementById('cheeseCount');
+const activeCats = [];
+let robotVacuums = [];
+let gameSprites = [];
+export let cheeses = [];
+let grid = Array(5).fill().map(() => Array(9).fill(null));
+let isAttacked = Array(5).fill(false);
+
+function createCat(type, x, y) {
+    switch (type) {
+        case 'chefCat':
+            let cat = new ChefCat(x, y);
+            cat.action();
+            return cat;
+        case 'singleYarnCat':
+            return new SingleYarnCat(x, y);
+        case 'doubleYarnCat':
+            return new DoubleYarnCat(x, y);
+        case 'sleepyCat':
+            return new SleepyCat(x, y);
+        case 'iceCat':
+            return new IceCat(x, y);
+        default:
+            return undefined;
+    }
+}
+
+function calculateCell(mouseX, mouseY) {
+    let col = floor((mouseX - gameFrame.padding_left) / gameFrame.tileWidth)
+    let row = floor((mouseY - gameFrame.padding_up) / gameFrame.tileHeight)
+    
+    console.log(`clicked on grid[${row}][${col}]`);
+    return {row, col};
+}
+
+function isCellValid(row, col) {
+    if (row < 0) return false;
+    if (row >= gameFrame.rows) return false;
+    if (col < 0) return false;
+    if (col >= gameFrame.cols) return false;
+    return true;
+}
 
 export function GameScene() {
     this.enter = function() {
-        select('#controlPanel').show();
+        select('#upperContainer').show();
         select('#menuButton').show();
         select('#startButton').hide();
+
+        upperContainer.style.width = width + 'px';
+        const gridHeight = gameFrame.rows * gameFrame.tileHeight;
+        upperContainer.style.height = (gameFrame.height - gridHeight - gameFrame.border) + 'px';
+
+        controlPanel.style.margin = gameFrame.border + 'px';
+        controlPanel.style.height = (gameFrame.height - gridHeight - 3 * gameFrame.border) + 'px';
+
+        gameSprites = [];   // kayanya ga butuh, sama kayak allSprites
+        robotVacuums = [];
+
+        for (let row = 0; row < gameFrame.rows; row ++) {
+            let x = gameFrame.paddingRobot + gameFrame.robotSize / 2;
+            let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
+
+            let vacuum = createSprite(x, y, gameFrame.robotSize, gameFrame.robotSize);
+            vacuum.image = imageAssets.robotVacuum;
+            vacuum.image.scale = gameFrame.tileWidth / 1000;
+            // vacuum.vel.x = 1;
+
+            gameSprites.push(vacuum);
+            robotVacuums.push(vacuum);
+        }
     }
 
     this.setup = function() {
@@ -16,35 +85,107 @@ export function GameScene() {
         gameFrame.height = height;
     
         const ratio = width / prototypeFrame.width;
-        gameFrame.tileWidth = ratio * prototypeFrame.tileWidth
-        gameFrame.tileHeight = ratio * prototypeFrame.tileHeight
-        gameFrame.padding_left = ratio * prototypeFrame.padding_left
+        Object.keys(prototypeFrame).forEach(key => {
+            if (key != 'width' && key != 'height') {
+                gameFrame[key] = ratio * prototypeFrame[key];
+            }
+        })
+
+        gameFrame.catRatio = 1.2 * gameFrame.tileWidth/200;
     }
 
     this.draw = function() {
-        console.log(`lets draw the gameScene`)
-        background(255);
-        textAlign(CENTER, CENTER);
-        textSize(40);
-        fill(0);
-        text("this is the game", width/2, height/2 - 50);
-        drawGrid()
+        clear();
+        image(imageAssets.gameBackground, 0, gameFrame.padding_up - gameFrame.border, gameFrame.width, gameFrame.height - gameFrame.padding_up + gameFrame.border);
+        noFill();
+        stroke('#B09472');
+        strokeWeight(gameFrame.border);
+        // fix the border radius --> create a ratio for it
+        rect(gameFrame.border / 2, gameFrame.border / 2, width - gameFrame.border, height - gameFrame.border, 35);
+        drawGrid();
+        activeCats.forEach((cat) => cat.action());
+    }
+
+    this.exit = function() {
+        console.log(`i exit gameScene`);
+        gameSprites.forEach((sprite) => sprite.remove());
+        activeCats.forEach((cat) => cat.remove());  // idk if it is needed or not
     }
 
     this.mousePressed = function() {
-        this.sceneManager.showScene(StartScene);
+        const {row, col} = calculateCell(mouseX, mouseY);
+
+        if (isCellValid(row, col) && selectedCatType === 'petCage') {
+            const cat = grid[row][col];
+            if (cat) {
+                cat.remove();
+                // TODO: need to remove from activeCats too
+                grid[row][col] = null;
+            }
+        }
+
+        else if (isCellValid(row, col) && selectedCatType != null) {
+            let x = gameFrame.padding_left + col * gameFrame.tileWidth + gameFrame.tileWidth / 2;
+            let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
+            const newCat = createCat(selectedCatType, x, y);
+            if (newCat) {
+                newCat.sprite.scale = gameFrame.catRatio;
+                grid[row][col] = newCat;
+                activeCats.push(newCat);
+                gameSprites.push(newCat.sprite); // Is this redundant? kedouble2
+                resetCatType();
+            }
+            // grid[row][col] = selectedCatType;
+            // console.log(`after click, grid[${row}][${col}] = ${grid[row][col]}`)
+        }
+
+        for (let i = 0; i < cheeses.length; i++) {
+            console.log(`there are ${cheeses.length} cheeses`)
+            // Calculate boundaries
+            let left = cheeses[i].x - cheeses[i].width / 2;
+            let right = cheeses[i].x + cheeses[i].width / 2;
+            let top = cheeses[i].y - cheeses[i].height / 2;
+            let bottom = cheeses[i].y + cheeses[i].height / 2;
+
+            if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
+                console.log(`cheese ${i} is pressed`)
+                updateCheeseCount(25);
+                cheeses[i].remove();
+                cheeses.splice(i, 1);
+                break;
+            }
+        }
+
     }
 
     function drawGrid() {
         for (let row = 0; row < gameFrame.rows; row++) {
             for (let col = 0; col < gameFrame.cols; col++) {
                 let x = gameFrame.padding_left + col * gameFrame.tileWidth;
-                let y = gameFrame.padding_left + row * gameFrame.tileHeight;
-                fill((row + col) % 2 === 0 ? '#fceecf' : '#fff6e9');
-                stroke(0);
-                // console.log(`rect(${x}, ${y}, ${gameFrame.tileWidth}, ${gameFrame.tileHeight})`)
+                let y = gameFrame.padding_up + row * gameFrame.tileHeight;
+
+                let isHovering = (
+                    mouseX > x && mouseX < x + gameFrame.tileWidth &&
+                    mouseY > y && mouseY < y + gameFrame.tileHeight
+                );
+
+                if (isHovering && selectedCatType) {
+                    fill('red');
+                }
+                else {
+                    fill((row + col) % 2 === 0 ? '#F7E7BE' : '#FDF4E5');
+                }
+                noStroke();
                 rect(x, y, gameFrame.tileWidth, gameFrame.tileHeight);
             }
         }
     }
+}
+
+function updateCheeseCount(n) {
+    console.log(`update cheeseCount by ${n}`)
+    let currCheese = int(cheeseCount.textContent);
+    currCheese += n;
+    cheeseCount.textContent = currCheese;
+    // TODO: handle if n is negative and currCheese < -n somewhere else
 }

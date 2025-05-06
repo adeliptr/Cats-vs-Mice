@@ -8,7 +8,8 @@
     <script src="js/p5.dom.min.js"></script>
     <script src="js/p5.sound.min.js"></script>
     <script src="js/scenemanager.js"></script>
-    <!-- <script src='https://cdnjs.cloudflare.com/ajax/libs/p5play/3.26.5/p5play.js' integrity='sha512-/U7V9+DgHiG8HVEtlGUYBRudMHgNB05AtyKOG2e4BduF4XogG4inVXPvEI5NE/I7R28a8K7gAgI7msqIzzBt4Q==' crossorigin='anonymous'></script> -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/planck-js/1.3.0/planck.js' integrity='sha512-OpFl/oyutfMxRHH9jnD7DwC14TmOzCsE/2l8Uf2PCGuLtUxX+qAhX/TNSV/rf24XZfANLoa10lmM40BlLMmRwg==' crossorigin='anonymous'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/p5play/3.26.5/p5play.js' integrity='sha512-/U7V9+DgHiG8HVEtlGUYBRudMHgNB05AtyKOG2e4BduF4XogG4inVXPvEI5NE/I7R28a8K7gAgI7msqIzzBt4Q==' crossorigin='anonymous'></script>
 
     <script type="module" src="sketch.js"></script>
 
@@ -20,19 +21,46 @@
 <body>
     <h1 id="title">Cats vs Mice</h1>
     <div id="gameFrame">
-        <div id="controlPanel">
-            <div id="catToolbar">
-                <button class="catButton" id="cheeseButton">🧀<span>250</span></button>
-                <button class="catButton" id="chefButton">🧑‍🍳<span>50</span></button>
-                <button class="catButton" id="singleYarnButton">🧶<span>100</span></button>
-                <button class="catButton" id="doubleYarnButton">🧶🧶<span>200</span></button>
-                <button class="catButton" id="sleepyButton">💤<span>150</span></button>
-                <button class="catButton" id="iceButton">❄️<span>150</span></button>
-            </div>
-
-            <div id="gameProgressWrapper">
-                <progress id="gameProgress" value="30" max="100"></progress>
-                <label>Game Progress</label>
+        <div id="upperContainer">
+            <div id="controlPanel">
+                <!-- <img src="assets/cheeseLabel.png" alt="Cheese Label" id="cheeseLabel"> -->
+                <label>CH</label>
+                <div id="cheeseDisplay">
+                    <img src="assets/cheese.png" alt="cheeseIcon" class="buttonIcon" id="cheeseIcon">
+                    <span id="cheeseCount">50</span>
+                </div>
+                <!-- <img src="assets/catsLabel.png" alt="Cat Label" id="cheeseLabel"> -->
+                <label>CA</label>
+                <div id="catToolbar">
+                    <button class="catButton" id="chefCat">
+                        <img src="assets/chef_cat_icon.png" alt="Chef Cat" class="catIcon" />
+                        <span>50</span>
+                    </button>
+                    <button class="catButton" id="singleYarnCat">
+                        <img src="assets/single_yarn_cat_icon.png" alt="Single Yarn Cat" class="catIcon" />
+                        <span>100</span>
+                    </button>
+                    <button class="catButton" id="doubleYarnCat">
+                        <img src="assets/double_yarn_cat_icon.png" alt="Double Yarn Cat" class="catIcon" />
+                        <span>200</span>
+                    </button>
+                    <button class="catButton" id="sleepyCat">
+                        <img src="assets/sleepy_cat_icon.png" alt="Sleepy Cat" class="catIcon" />
+                        <span>150</span>
+                    </button>
+                    <button class="catButton" id="iceCat">
+                        <img src="assets/ice_cat_icon.png" alt="Ice Cat" class="catIcon" />
+                        <span>150</span>
+                    </button>
+                </div>
+                <button class="catButton" id="petCage">
+                    <img src="assets/petCage.png" alt="Pet Cage" class="catIcon" />
+                    <span>200</span>
+                </button>
+                <!-- <div id="gameProgressWrapper">
+                    <progress id="gameProgress" value="30" max="100"></progress>
+                    <label>Game Progress</label>
+                </div> -->
             </div>
         </div>
     </div>
