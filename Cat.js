@@ -1,8 +1,9 @@
 import { gameFrame } from './prototype.js';
 import { catAnimation, imageAssets } from './sketch.js';
-import { grid, cheeses, activeMice, calculateCell } from './GameScene.js';
+import { grid, cheeses, activeMice, calculateCell, mouseGroup, throwableGroup } from './GameScene.js';
+import { Yarn, Snowball } from './Throwable.js';
 
-export const movingObjects = [];
+export const throwables = [];
 export const catAniDesc = {
     chefCat: {
         idle: { row: 0, frames: 4, frameSize: [200, 200], frameDelay: 10 },
@@ -33,9 +34,9 @@ export class Cat {
         this.sprite.spriteSheet = spriteSheet;
         this.sprite.addAnis(ani);
         this.sprite.collider = 'static';
+        this.sprite.collides(mouseGroup);
+        this.sprite.overlaps(throwableGroup);
         this.sprite.layer = 1;
-        console.log(this.spriteSheet);
-        console.log(this.sprite.animation);
         this.sprite.changeAni('idle');
         this.active = false;
 
@@ -137,16 +138,15 @@ export class SingleYarnCat extends Cat {
         else this.switchToIdle();
 
         if (this.active && (millis() - this.lastShot > 3000)) {
-            const yarn = createSprite(this.x + gameFrame.tileWidth / 2, this.y, 20, 20);
-            yarn.image = imageAssets.yarn;
-            yarn.scale = gameFrame.tileWidth / 1024;
-            yarn.vel.x = 1;
-            yarn.life = 600;
-            const newMovingObject = {
-                sprite: yarn,
-                point: 15
+            let yarnX = this.x + gameFrame.tileWidth / 2;
+            let yarnY = this.y;
+
+            const yarn = new Yarn(yarnX, yarnY);
+            if (yarn) {
+                throwables.push(yarn);
+                throwableGroup.add(yarn.sprite);
             }
-            movingObjects.push(newMovingObject);
+
             this.lastShot = millis();
         }
     }
@@ -165,18 +165,18 @@ export class DoubleYarnCat extends Cat {
         else this.switchToIdle();
 
         if (this.active && (millis() - this.lastShot > 3000)) {
+            // TODO: check on the offset again
             for (let offset of [0, 20]) {
-                const yarn = createSprite(this.x + gameFrame.tileWidth / 2 + offset, this.y, 20, 20);
-                yarn.image = imageAssets.yarn;
-                yarn.scale = gameFrame.tileWidth / 1024;
-                yarn.vel.x = 1;
-                yarn.life = 600;
-                const newMovingObject = {
-                    sprite: yarn,
-                    point: 15
+                let yarnX = this.x + gameFrame.tileWidth / 2 + offset;
+                let yarnY = this.y;
+
+                const yarn = new Yarn(yarnX, yarnY);
+                if (yarn) {
+                    throwables.push(yarn);
+                    throwableGroup.add(yarn.sprite);
                 }
-                movingObjects.push(newMovingObject);
             }
+
             this.lastShot = millis();
         }
     }
@@ -191,7 +191,6 @@ export class SleepyCat extends Cat {
     }
 
     action(targetMouse) {
-        console.log(`do i get here`);
         if (this.awake) {
             this.changeAni('action');
             this.wakeStart = millis();
@@ -221,16 +220,15 @@ export class IceCat extends Cat {
         else this.switchToIdle();
 
         if (this.active && (millis() - this.lastShot > 3000)) {
-            const snowball = createSprite(this.x + gameFrame.tileWidth / 2, this.y, 20, 20);
-            snowball.image = imageAssets.snowball;
-            snowball.scale = gameFrame.tileWidth / 1024;
-            snowball.vel.x = 1;
-            snowball.life = 600;
-            const newMovingObject = {
-                sprite: snowball,
-                point: 20
+            const snowballX = this.x + gameFrame.tileWidth / 2;
+            const snowballY = this.y;
+
+            const snowball = new Snowball(snowballX, snowballY)
+            if (snowball) {
+                throwables.push(snowball);
+                throwableGroup.add(snowball.sprite);
             }
-            movingObjects.push(newMovingObject);
+
             this.lastShot = millis();
         }
     }
