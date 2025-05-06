@@ -20,10 +20,11 @@ function preload() {
     gameBackground = loadImage('assets/gamebg3.png');
 
     imageAssets.cheese = loadImage('assets/cheese.png');
-    // imageAssets.yarn = loadImage('assets/yarn.png');
-    // imageAssets.snowball = loadImage('assets/snowball.png');
+    imageAssets.yarn = loadImage('assets/yarn.png');
+    imageAssets.snowball = loadImage('assets/snowball.png');
     imageAssets.robotVacuum = loadImage('assets/robot_vacuum.png');
     imageAssets.gameBackground = loadImage('assets/gamebg3.png');
+    imageAssets.mouse = loadImage('assets/mouse.png');
 
     catImages.chefCat = loadImage('assets/chef_cat_icon.png');
     catImages.singleYarnCat = loadImage('assets/single_yarn_cat_icon.png');
@@ -34,7 +35,7 @@ function preload() {
     catAnimation.chefCat = loadImage('assets/chef_cat_ani.png');
     catAnimation.singleYarnCat = loadImage('assets/single_yarn_cat_ani.png');
     catAnimation.doubleYarnCat = loadImage('assets/double_yarn_cat_ani.png');
-    catAnimation.sleepyCat = loadImage('assets/sleepy_cat_icon.png');
+    catAnimation.sleepyCat = loadImage('assets/sleepy_cat_ani.png');
     catAnimation.iceCat = loadImage('assets/ice_cat_ani.png');
 
     // catAnimation.chefCat = loadAni('assets/chef_cat_ani.png', {

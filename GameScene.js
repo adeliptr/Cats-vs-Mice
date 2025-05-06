@@ -1,18 +1,22 @@
 import { prototypeFrame, gameFrame } from './prototype.js';
-import { StartScene } from './StartScene.js';
 import { imageAssets, catImages, catAnimation, selectedCatType, resetCatType } from './sketch.js';
-import { Cat, ChefCat, SingleYarnCat, DoubleYarnCat, SleepyCat, IceCat } from './Cat.js'
+import { Cat, ChefCat, SingleYarnCat, DoubleYarnCat, SleepyCat, IceCat } from './Cat.js';
+import { Mice, BasicMouse, HelmetMouse } from './Mouse.js';
+import { level1Mice } from './level/level1.js';
 
 const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');
 const controlPanel = document.getElementById('controlPanel');
 const cheeseCount = document.getElementById('cheeseCount');
 const activeCats = [];
+export const activeMice = Array.from({ length: 5 }, () => []);
 let robotVacuums = [];
 let gameSprites = [];
+let sleepyCats = [];
 export let cheeses = [];
-let grid = Array(5).fill().map(() => Array(9).fill(null));
-let isAttacked = Array(5).fill(false);
+export let grid = Array(5).fill().map(() => Array(9).fill(null));
+let startTime;
+let levelMice = [...level1Mice];
 
 function createCat(type, x, y) {
     switch (type) {
@@ -33,11 +37,21 @@ function createCat(type, x, y) {
     }
 }
 
-function calculateCell(mouseX, mouseY) {
+function createMouse(type, x, y) {
+    switch (type) {
+        case 'basicMouse':
+            return new BasicMouse(x, y);
+        case 'helmetMouse':
+            return new HelmetMouse(x, y);
+        default:
+            return undefined;
+    }
+}
+
+export function calculateCell(mouseX, mouseY) {
     let col = floor((mouseX - gameFrame.padding_left) / gameFrame.tileWidth)
     let row = floor((mouseY - gameFrame.padding_up) / gameFrame.tileHeight)
     
-    console.log(`clicked on grid[${row}][${col}]`);
     return {row, col};
 }
 
@@ -77,6 +91,8 @@ export function GameScene() {
             gameSprites.push(vacuum);
             robotVacuums.push(vacuum);
         }
+
+        startTime = millis() / 1000;
     }
 
     this.setup = function() {
@@ -103,7 +119,27 @@ export function GameScene() {
         // fix the border radius --> create a ratio for it
         rect(gameFrame.border / 2, gameFrame.border / 2, width - gameFrame.border, height - gameFrame.border, 35);
         drawGrid();
+
+        let currTime = millis() / 1000 - startTime;
+
+        while (levelMice.length > 0 && levelMice[0].time <= currTime) {
+            const { time, type, row } = levelMice.shift();
+            spawnMouse(type, row);
+        }
+
         activeCats.forEach((cat) => cat.action());
+        for (let row = 0; row < gameFrame.rows; row++) {
+            for (let i = 0; i < activeMice[row].length; i++) {
+                const currMouse = activeMice[row][i];
+                sleepyCats.forEach((cat) => {
+                    if (cat.sprite.overlaps(currMouse.sprite)) {
+                        cat.awake = true;
+                        cat.action(currMouse);
+                        activeMice[row].splice(i, 1);
+                    }
+                })
+            }
+        }
     }
 
     this.exit = function() {
@@ -120,6 +156,10 @@ export function GameScene() {
             if (cat) {
                 cat.remove();
                 // TODO: need to remove from activeCats too
+                const index = activeCats.indexOf(cat);
+                if (index !== -1) {
+                    activeCats.splice(index, 1);
+                }
                 grid[row][col] = null;
             }
         }
@@ -133,6 +173,7 @@ export function GameScene() {
                 grid[row][col] = newCat;
                 activeCats.push(newCat);
                 gameSprites.push(newCat.sprite); // Is this redundant? kedouble2
+                if (newCat instanceof SleepyCat) sleepyCats.push(newCat);
                 resetCatType();
             }
             // grid[row][col] = selectedCatType;
@@ -188,4 +229,16 @@ function updateCheeseCount(n) {
     currCheese += n;
     cheeseCount.textContent = currCheese;
     // TODO: handle if n is negative and currCheese < -n somewhere else
+}
+
+function spawnMouse(type, row) {
+    let x = width;
+    let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
+
+    let newMouse = new createMouse(type, x, y);
+    if (newMouse) {
+        newMouse.sprite.scale = gameFrame.catRatio;
+        activeMice[row].push(newMouse);
+        gameSprites.push(newMouse.sprite); // Is this redundant? kedouble2 sama allSprites
+    }
 }

@@ -1,6 +1,6 @@
 import { gameFrame } from './prototype.js';
 import { catAnimation, imageAssets } from './sketch.js';
-import { cheeses } from './GameScene.js';
+import { grid, cheeses, activeMice, calculateCell } from './GameScene.js';
 
 export const movingObjects = [];
 export const catAniDesc = {
@@ -10,19 +10,19 @@ export const catAniDesc = {
     },
     singleYarnCat: {
         idle: { row: 0, frameSize: [200, 200] },
-        action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 5 }
+        action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 22 }
     },
     doubleYarnCat: {
         idle: { row: 0, frameSize: [200, 200] },
-        action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 5 }
+        action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 22 }
     },
     sleepyCat: {
-        idle: {row: 0, frameSize: [200, 200] },
-        action: {row: 0, frameSize: [200, 200] }
+        idle: {row: 0, frames: 6, frameSize: [200, 200], frameDelay: 20 },
+        action: {row: 1, frames: 9, frameSize: [200, 200], frameDelay: 10 }
     },
     iceCat: {
         idle: { row: 0, frameSize: [200, 200] },
-        action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 5 }
+        action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 22 }
     }
 }
 
@@ -32,9 +32,12 @@ export class Cat {
         this.sprite = createSprite(x, y, width, width);
         this.sprite.spriteSheet = spriteSheet;
         this.sprite.addAnis(ani);
+        this.sprite.collider = 'static';
+        this.sprite.layer = 1;
         console.log(this.spriteSheet);
         console.log(this.sprite.animation);
         this.sprite.changeAni('idle');
+        this.active = false;
 
         this.x = x;
         this.y = y;
@@ -42,14 +45,20 @@ export class Cat {
         this.ani = ani;
         this.width = width;
         this.HP = 200;
+
+        const { row, col } = calculateCell(x, y);
+        this.row = row;
+        this.col = col;
     }
 
     switchToIdle() {
         this.sprite.changeAni('idle');
+        this.active = false;
     }
     
     switchToAction() {
         this.sprite.changeAni('action');
+        this.active = true;
     }
 
     action() {
@@ -77,10 +86,10 @@ export class Cat {
         // if HP = 0, remove sprite
     }
 
-    draw() {
-        drawSprite(this.sprite);
-        // animation(this.ani, this.x, this.y, 0, this.width, this.width);
-    }
+    // draw() {
+    //     drawSprite(this.sprite);
+    //     // animation(this.ani, this.x, this.y, 0, this.width, this.width);
+    // }
 
     collide() {
         //
@@ -92,6 +101,7 @@ export class Cat {
 
     remove() {
         this.sprite.remove();
+        grid[this.row][this.col] = null;
     }
 }
 
@@ -124,9 +134,13 @@ export class SingleYarnCat extends Cat {
 
     action() {
         // Throw yarn every 3 seconds -> yarn has velocity x of 1 (to the right)
-        if (millis() - this.lastShot > 3000) {
+        if (activeMice[this.row].length > 0) this.switchToAction();
+        else this.switchToIdle();
+
+        if (this.active && (millis() - this.lastShot > 3000)) {
             const yarn = createSprite(this.x + gameFrame.tileWidth / 2, this.y, 20, 20);
-            yarn.addImage(imageAssets.yarn);
+            yarn.image = imageAssets.yarn;
+            yarn.scale = gameFrame.tileWidth / 1024;
             yarn.vel.x = 1;
             yarn.life = 600;
             movingObjects.push(yarn);
@@ -143,10 +157,15 @@ export class DoubleYarnCat extends Cat {
 
     action() {
         // Throw 2 yarns every 3 seconds -> yarn has velocity x of 1 (to the right)
-        if (millis() - this.lastShot > 3000) {
-            for (let offset of [0, 20]) {   // change to the actual yarn size, not 20
+
+        if (activeMice[this.row].length > 0) this.switchToAction();
+        else this.switchToIdle();
+
+        if (this.active && (millis() - this.lastShot > 3000)) {
+            for (let offset of [0, 20]) {
                 const yarn = createSprite(this.x + gameFrame.tileWidth / 2 + offset, this.y, 20, 20);
-                yarn.addImage(imageAssets.yarn);
+                yarn.image = imageAssets.yarn;
+                yarn.scale = gameFrame.tileWidth / 1024;
                 yarn.vel.x = 1;
                 yarn.life = 600;
                 movingObjects.push(yarn);
@@ -161,18 +180,36 @@ export class SleepyCat extends Cat {
         super(x, y, 150, catAnimation.sleepyCat, catAniDesc.sleepyCat, 100);
         this.awake = false;
         this.wakeStart = undefined;
+        this.targetMouse = undefined;
     }
 
-    action() {
-        if (this.awake && !this.wakeStart) {
-            this.changeAni('wake_up');
+    action(targetMouse) {
+        console.log(`do i get here`);
+        if (this.awake) {
+            this.changeAni('action');
             this.wakeStart = millis();
+            this.targetMouse = targetMouse;
+            this.awake = false;
         }
-        if (this.wakeStart && millis() - this.wakeStart > 1000) {
-            this.remove();
-            // Still needs to remove it from the activeCats or grid[row][col]
+
+        if (this.wakeStart != undefined) {
+            if (millis() - this.wakeStart > 900) {
+                if (this.targetMouse) this.targetMouse.remove();
+            }
+            if (millis() - this.wakeStart > 1480) this.remove();
         }
     }
+
+    // action(mouse) {
+    //     if (this.awake) {
+    //         this.changeAni('action');
+    //         this.wakeStart = millis();
+    //     }
+    //     if (this.wakeStart && millis() - this.wakeStart > 1000) {
+    //         this.remove();
+    //         // Still needs to remove it from the activeCats or grid[row][col]
+    //     }
+    // }
 }
 
 export class IceCat extends Cat {
@@ -183,9 +220,14 @@ export class IceCat extends Cat {
 
     action() {
         // Throw snowball every 3 seconds -> snowball has velocity x of 1 (to the right)
-        if (millis() - this.lastShot > 3000) {
-            const snowball = createSprite(this.x, this.y, 20, 20);
-            snowball.addImage(imageAssets.snowball);
+
+        if (activeMice[this.row].length > 0) this.switchToAction();
+        else this.switchToIdle();
+
+        if (this.active && (millis() - this.lastShot > 3000)) {
+            const snowball = createSprite(this.x + gameFrame.tileWidth / 2, this.y, 20, 20);
+            snowball.image = imageAssets.snowball;
+            snowball.scale = gameFrame.tileWidth / 1024;
             snowball.vel.x = 1;
             snowball.life = 600;
             movingObjects.push(snowball);
