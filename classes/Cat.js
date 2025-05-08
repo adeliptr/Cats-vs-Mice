@@ -1,10 +1,11 @@
-import { gameFrame } from './prototype.js';
-import { catAnimation, imageAssets } from './sketch.js';
-import { grid, cheeses, activeMice, calculateCell, mouseGroup, throwableGroup } from './GameScene.js';
+import { gameFrame } from '../constants/Prototype.js';
+import { catAnimation, imageAssets } from '../sketch.js';
+import { grid, cheeses, activeCats, activeMice, calculateCell, mouseGroup, throwableGroup, catGroup } from '../GameScene.js';
 import { Yarn, Snowball } from './Throwable.js';
 
 export const throwables = [];
-export const catAniDesc = {
+export const sleepyCats = [];
+const catAniDesc = {
     chefCat: {
         idle: { row: 0, frames: 4, frameSize: [200, 200], frameDelay: 10 },
         action: { row: 0, frames: 4, frameSize: [200, 200], frameDelay: 10 }
@@ -21,31 +22,35 @@ export const catAniDesc = {
         idle: {row: 0, frames: 6, frameSize: [200, 200], frameDelay: 20 },
         action: {row: 1, frames: 9, frameSize: [200, 200], frameDelay: 10 }
     },
+    explosion: {
+        action: {row: 0, frames: 9, frameSize: [200, 200], frameDelay: 10 }
+    },
     iceCat: {
         idle: { row: 0, frameSize: [200, 200] },
         action: {row: 1, frames: 8, frameSize: [200, 200], frameDelay: 22 }
     }
 }
 
-export class Cat {
-    constructor(x, y, cost, spriteSheet, ani, width) {
+class Cat {
+    constructor(x, y, cost, spriteSheet, ani) {
         // (x, y) is the center of the grid
-        this.sprite = createSprite(x, y, width, width);
+        this.width = 1.2 * gameFrame.tileWidth;
+        this.sprite = createSprite(x, y, this.width, this.width);
         this.sprite.spriteSheet = spriteSheet;
+        this.sprite.scale = gameFrame.catRatio;
         this.sprite.addAnis(ani);
         this.sprite.collider = 'static';
-        this.sprite.collides(mouseGroup);
         this.sprite.overlaps(throwableGroup);
         this.sprite.layer = 1;
         this.sprite.changeAni('idle');
         this.active = false;
+        this.explosion = undefined;
 
         this.x = x;
         this.y = y;
         this.cost = cost;
         this.ani = ani;
-        this.width = width;
-        this.HP = 200;
+        this.HP = 100;
 
         const { row, col } = calculateCell(x, y);
         this.row = row;
@@ -62,38 +67,19 @@ export class Cat {
         this.active = true;
     }
 
-    action() {
-        // TODO:
-        // - ChefCat: produces cheese every 10 seconds -> cheese.png pop up on top of the ChefCat every 10 seconds
-        // - SingleYarnCat: throw a yarn every 3 seconds -> a sprite of yarn.png shows up on the right of the cat with velocity of 1 to the right,
-        //                 delete the sprite of yarn when yarn hit a mouse or get out of the gameFrame
-        // - DoubleYarnCat: similar to SingleYarnCat but throw 2 yarns every 3 seconds, the yarns are visibly detached from each other
-        // - SleepyCat: stay idle until collide with a mouse, when colliding, change ani into 'wake_up' and then remove the sleepyCat sprite
-        // - IceCat: throw a snowball every 3 seconds from its mouth, the snowball is a sprite with image snowball.png
-        //         delete the snowball sprite when it hit a mouse or get out of gameFrame
-    }
-
-    update() {
-        // update ani
-        clear();
-        if (kb.presses('a')) {
-            console.log(`a is pressed`)
-            this.sprite.changeAni('action');
-        }
-    }
-
     attacked(mouse) {
-        this.HP = max(0, this.HP - mouse.AP);
-        // if HP = 0, remove sprite
-    }
-
-    // draw() {
-    //     drawSprite(this.sprite);
-    //     // animation(this.ani, this.x, this.y, 0, this.width, this.width);
-    // }
-
-    collide() {
-        //
+        this.addExplosion(imageAssets.grayExplosion);
+        this.explosion = undefined;
+        this.HP -= mouse.AP;
+        setTimeout(() => {
+            if (this.HP <= 0) {
+                this.remove();
+                mouse.targetCat = undefined;
+            }
+            else {
+                this.sprite.opacity = (this.HP / 100) * 0.7 + 0.3;
+            }
+        }, 1500);
     }
 
     changeAni(name) {
@@ -103,32 +89,52 @@ export class Cat {
     remove() {
         this.sprite.remove();
         grid[this.row][this.col] = null;
+
+        const index = activeCats.indexOf(this);
+        if (index !== -1) {
+            activeCats.splice(index, 1);
+        }
+    }
+
+    addExplosion(spriteSheet) {
+        this.explosion = createSprite(this.x, this.y, this.width, this.width);
+        this.explosion.spriteSheet = spriteSheet;
+        this.explosion.scale = gameFrame.catRatio;
+        this.explosion.life = 90;
+        this.explosion.collider = 'none';
+        this.explosion.addAnis(catAniDesc.explosion);
+        this.explosion.changeAni('action');
+        // this.explosion.overlaps(mouseGroup);
+        // this.explosion.overlaps(catGroup);
     }
 }
 
-export class ChefCat extends Cat {
+class ChefCat extends Cat {
     constructor(x, y) {
-        super(x, y, 50, catAnimation.chefCat, catAniDesc.chefCat, 100);
+        super(x, y, 50, catAnimation.chefCat, catAniDesc.chefCat);
         this.lastProduced = millis();
+        this.offset = 0;
     }
 
     action() {
         // Produces 25 cheese every 10 seconds, cheese.png pop in front of the chefCat
         if (millis() - this.lastProduced > 10000) {
             console.log(`produces Cheese!`)
-            const cheese = createSprite(this.x + this.width / 5, this.y + this.width / 5);
-            cheese.scale = this.width / 300;
+            const cheese = createSprite(this.x + this.width / 4 + this.offset * this.width / 20, this.y + this.width / 3 + this.offset * this.width / 20);
+            cheese.scale = this.width / 216;
             cheese.image = imageAssets.cheese;
-            cheese.mouseActive = true;
+            cheese.collider = 'static';
+            cheese.overlaps(mouseGroup);
             cheeses.push(cheese);
             this.lastProduced = millis();
+            this.offset = (this.offset + 1) % 3;
         }
     }
 }
 
-export class SingleYarnCat extends Cat {
+class SingleYarnCat extends Cat {
     constructor(x, y) {
-        super(x, y, 100, catAnimation.singleYarnCat, catAniDesc.singleYarnCat, 100);
+        super(x, y, 100, catAnimation.singleYarnCat, catAniDesc.singleYarnCat);
         this.lastShot = millis();
     }
 
@@ -152,9 +158,9 @@ export class SingleYarnCat extends Cat {
     }
 }
 
-export class DoubleYarnCat extends Cat {
+class DoubleYarnCat extends Cat {
     constructor(x, y) {
-        super(x, y, 200, catAnimation.doubleYarnCat, catAniDesc.doubleYarnCat, 100);
+        super(x, y, 200, catAnimation.doubleYarnCat, catAniDesc.doubleYarnCat);
         this.lastShot = millis();
     }
 
@@ -182,9 +188,9 @@ export class DoubleYarnCat extends Cat {
     }
 }
 
-export class SleepyCat extends Cat {
+class SleepyCat extends Cat {
     constructor(x, y) {
-        super(x, y, 150, catAnimation.sleepyCat, catAniDesc.sleepyCat, 100);
+        super(x, y, 150, catAnimation.sleepyCat, catAniDesc.sleepyCat);
         this.awake = false;
         this.wakeStart = undefined;
         this.targetMouse = undefined;
@@ -193,8 +199,11 @@ export class SleepyCat extends Cat {
     action(targetMouse) {
         if (this.awake) {
             this.changeAni('action');
+            this.addExplosion(imageAssets.redExplosion);
             this.wakeStart = millis();
             this.targetMouse = targetMouse;
+            this.targetMouse.sprite.vel.x = 0;
+            this.targetMouse.sprite.changeAni('idle');
             this.awake = false;
         }
 
@@ -202,14 +211,18 @@ export class SleepyCat extends Cat {
             if (millis() - this.wakeStart > 900) {
                 if (this.targetMouse) this.targetMouse.remove();
             }
-            if (millis() - this.wakeStart > 1480) this.remove();
+            if (millis() - this.wakeStart > 1480) {
+                this.remove();
+                this.explosion.remove();
+                this.explosion = undefined;
+            }
         }
     }
 }
 
-export class IceCat extends Cat {
+class IceCat extends Cat {
     constructor(x, y) {
-        super(x, y, 150, catAnimation.iceCat, catAniDesc.iceCat, 100);
+        super(x, y, 150, catAnimation.iceCat, catAniDesc.iceCat);
         this.lastShot = millis();
     }
 
@@ -231,5 +244,26 @@ export class IceCat extends Cat {
 
             this.lastShot = millis();
         }
+    }
+}
+
+export function createCat(type, x, y) {
+    switch (type) {
+        case 'chefCat':
+            const chefCat = new ChefCat(x, y);
+            chefCat.action();
+            return chefCat;
+        case 'singleYarnCat':
+            return new SingleYarnCat(x, y);
+        case 'doubleYarnCat':
+            return new DoubleYarnCat(x, y);
+        case 'sleepyCat':
+            const sleepyCat = new SleepyCat(x, y);
+            if (sleepyCat) sleepyCats.push(sleepyCat);
+            return sleepyCat;
+        case 'iceCat':
+            return new IceCat(x, y);
+        default:
+            return undefined;
     }
 }

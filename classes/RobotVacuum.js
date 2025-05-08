@@ -1,6 +1,6 @@
-import { gameFrame } from './prototype.js';
-import { imageAssets } from './sketch.js';
-import { activeMice } from './GameScene.js';
+import { gameFrame } from '../constants/Prototype.js';
+import { imageAssets } from '../sketch.js';
+import { activeMice, catGroup, throwableGroup } from '../GameScene.js';
 
 export class RobotVacuum {
     constructor(x, y, row) {
@@ -8,6 +8,8 @@ export class RobotVacuum {
         this.sprite.image = imageAssets.robotVacuum;
         this.sprite.scale = gameFrame.tileWidth / 1000;
         this.sprite.layer = 2;
+        this.sprite.overlaps(catGroup);
+        this.sprite.overlaps(throwableGroup);
         this.activated = false;
         this.row = row;
     }

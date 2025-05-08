@@ -1,54 +1,24 @@
-import { prototypeFrame, gameFrame } from './prototype.js';
+import { prototypeFrame, gameFrame } from './constants/Prototype.js';
+import { Colors } from './constants/Colors.js';
 import { imageAssets, selectedCatType, resetCatType } from './sketch.js';
-import { ChefCat, SingleYarnCat, DoubleYarnCat, SleepyCat, IceCat, throwables } from './Cat.js';
-import { BasicMouse, HelmetMouse } from './Mouse.js';
-import { level1Mice } from './level/level1.js';
-import { RobotVacuum } from './RobotVacuum.js';
+import { createCat, sleepyCats, throwables } from './classes/Cat.js';
+import { createMouse } from './classes/Mouse.js';
+import { RobotVacuum } from './classes/RobotVacuum.js';
+import { level1Mice } from './level/Level1.js';
 
 const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');
 const controlPanel = document.getElementById('controlPanel');
 const cheeseCount = document.getElementById('cheeseCount');
-const activeCats = [];
+export const activeCats = [];
 export const activeMice = Array.from({ length: 5 }, () => []);
-let robotVacuums = [];
+const robotVacuums = [];
 let gameSprites = [];
-let sleepyCats = [];
 export let cheeses = [];
 export let grid = Array(5).fill().map(() => Array(9).fill(null));
 let startTime;
 let levelMice = [...level1Mice];
-export let catGroup, mouseGroup, throwableGroup;
-
-function createCat(type, x, y) {
-    switch (type) {
-        case 'chefCat':
-            let cat = new ChefCat(x, y);
-            cat.action();
-            return cat;
-        case 'singleYarnCat':
-            return new SingleYarnCat(x, y);
-        case 'doubleYarnCat':
-            return new DoubleYarnCat(x, y);
-        case 'sleepyCat':
-            return new SleepyCat(x, y);
-        case 'iceCat':
-            return new IceCat(x, y);
-        default:
-            return undefined;
-    }
-}
-
-function createMouse(type, x, y, row) {
-    switch (type) {
-        case 'basicMouse':
-            return new BasicMouse(x, y, row);
-        case 'helmetMouse':
-            return new HelmetMouse(x, y, row);
-        default:
-            return undefined;
-    }
-}
+export let catGroup, mouseGroup, throwableGroup, cheeseGroup;
 
 export function calculateCell(mouseX, mouseY) {
     let col = floor((mouseX - gameFrame.padding_left) / gameFrame.tileWidth)
@@ -79,7 +49,6 @@ export function GameScene() {
         controlPanel.style.height = (gameFrame.height - gridHeight - 3 * gameFrame.border) + 'px';
 
         gameSprites = [];   // kayanya ga butuh, sama kayak allSprites
-        robotVacuums = [];
 
         for (let row = 0; row < gameFrame.rows; row ++) {
             let x = gameFrame.paddingRobot + gameFrame.robotSize / 2;
@@ -111,13 +80,14 @@ export function GameScene() {
         catGroup = new Group();
         mouseGroup = new Group();
         throwableGroup = new Group();
+        cheeseGroup = new Group();
     }
 
     this.draw = function() {
         clear();
         image(imageAssets.gameBackground, 0, gameFrame.padding_up - gameFrame.border, gameFrame.width, gameFrame.height - gameFrame.padding_up + gameFrame.border);
         noFill();
-        stroke('#B09472');
+        stroke(Colors.dark_brown);
         strokeWeight(gameFrame.border);
         // fix the border radius --> create a ratio for it
         rect(gameFrame.border / 2, gameFrame.border / 2, width - gameFrame.border, height - gameFrame.border, 35);
@@ -131,14 +101,24 @@ export function GameScene() {
         }
 
         activeCats.forEach((cat) => cat.action());
+
+
         for (let row = 0; row < gameFrame.rows; row++) {
             for (let i = 0; i < activeMice[row].length; i++) {
                 const currMouse = activeMice[row][i];
+                currMouse.attack();
                 sleepyCats.forEach((cat) => {
                     if (cat.sprite.overlaps(currMouse.sprite)) {
                         cat.awake = true;
                         cat.action(currMouse);
                         activeMice[row].splice(i, 1);
+                    }
+                })
+
+                activeCats.forEach((cat) => {
+                    if (cat.sprite.overlaps(currMouse.sprite)) {
+                        currMouse.targetCat = cat;
+                        console.log(`seting targetCat to ${currMouse.targetCat}`);
                     }
                 })
 
@@ -160,6 +140,7 @@ export function GameScene() {
 
     this.exit = function() {
         console.log(`i exit gameScene`);
+        console.log(allSprites);
         gameSprites.forEach((sprite) => sprite.remove());
         activeCats.forEach((cat) => cat.remove());  // idk if it is needed or not
     }
@@ -180,21 +161,18 @@ export function GameScene() {
             }
         }
 
-        else if (isCellValid(row, col) && selectedCatType != null) {
+        else if (isCellValid(row, col) && grid[row][col] == null && selectedCatType != null) {
             let x = gameFrame.padding_left + col * gameFrame.tileWidth + gameFrame.tileWidth / 2;
             let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
             const newCat = createCat(selectedCatType, x, y);
             if (newCat) {
-                newCat.sprite.scale = gameFrame.catRatio;
                 grid[row][col] = newCat;
                 activeCats.push(newCat);
                 catGroup.add(newCat.sprite);
                 gameSprites.push(newCat.sprite); // Is this redundant? kedouble2
-                if (newCat instanceof SleepyCat) sleepyCats.push(newCat);
+                updateCheeseCount(-newCat.cost);
                 resetCatType();
             }
-            // grid[row][col] = selectedCatType;
-            // console.log(`after click, grid[${row}][${col}] = ${grid[row][col]}`)
         }
 
         for (let i = 0; i < cheeses.length; i++) {
@@ -227,11 +205,11 @@ export function GameScene() {
                     mouseY > y && mouseY < y + gameFrame.tileHeight
                 );
 
-                if (isHovering && selectedCatType) {
+                if (isHovering && selectedCatType && grid[row][col] == null) {
                     fill('red');
                 }
                 else {
-                    fill((row + col) % 2 === 0 ? '#F7E7BE' : '#FDF4E5');
+                    fill((row + col) % 2 === 0 ? Colors.dark_yellow : Colors.light_yellow);
                 }
                 noStroke();
                 rect(x, y, gameFrame.tileWidth, gameFrame.tileHeight);
@@ -254,7 +232,6 @@ function spawnMouse(type, row) {
 
     let newMouse = new createMouse(type, x, y, row);
     if (newMouse) {
-        newMouse.sprite.scale = gameFrame.catRatio;
         activeMice[row].push(newMouse);
         mouseGroup.add(newMouse.sprite);
         gameSprites.push(newMouse.sprite); // Is this redundant? kedouble2 sama allSprites

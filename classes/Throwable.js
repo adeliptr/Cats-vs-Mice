@@ -1,5 +1,5 @@
-import { gameFrame } from "./prototype.js";
-import { imageAssets } from "./sketch.js";
+import { gameFrame } from '../constants/Prototype.js';
+import { imageAssets } from '../sketch.js';
 
 export class Throwable {
     constructor(x, y, point, img, width) {
@@ -8,6 +8,7 @@ export class Throwable {
         // TODO: check on the scale again
         this.sprite.scale = gameFrame.tileWidth / 1024;
         this.sprite.vel.x = 1;
+        this.sprite.rotationSpeed = 1;
         this.sprite.life = 600;
         this.point = point;
         this.width = width;

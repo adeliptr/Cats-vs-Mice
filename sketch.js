@@ -6,9 +6,10 @@ const gameParent = document.getElementById('gameFrame');
 const controlPanel = document.getElementById('controlPanel');
 const startButton = document.getElementById('startButton');
 export let startPageAni, robotVacuum, gameBackground;
-export let imageAssets = {};
+export const imageAssets = {};
 export const catImages = {};
 export const catAnimation = {};
+export const mouseAnimation = {};
 export let selectedCatType = null;
 
 function preload() {
@@ -25,6 +26,8 @@ function preload() {
     imageAssets.robotVacuum = loadImage('assets/robot_vacuum.png');
     imageAssets.gameBackground = loadImage('assets/gamebg3.png');
     imageAssets.mouse = loadImage('assets/mouse.png');
+    imageAssets.redExplosion = loadImage('assets/red_explosion.png');
+    imageAssets.grayExplosion = loadImage('assets/gray_explosion.png');
 
     catImages.chefCat = loadImage('assets/chef_cat_icon.png');
     catImages.singleYarnCat = loadImage('assets/single_yarn_cat_icon.png');
@@ -38,23 +41,10 @@ function preload() {
     catAnimation.sleepyCat = loadImage('assets/sleepy_cat_ani.png');
     catAnimation.iceCat = loadImage('assets/ice_cat_ani.png');
 
-    // catAnimation.chefCat = loadAni('assets/chef_cat_ani.png', {
-    //     width: 200, height: 200, frames: 4
-    // });
-    // catAnimation.singleYarnCat = loadAni('assets/single_yarn_cat_ani.png', {
-    //     width: 200, height:200, frames: 8
-    // });
-    // catAnimation.doubleYarnCat = loadAni('assets/double_yarn_cat_ani.png', {
-    //     width: 200, height: 200, frames: 8
-    // });
-    // catAnimation.iceCat = loadAni('assets/ice_cat_ani.png', {
-    //     width: 200, height: 200, frames: 8
-    // });
-    
-    // catAnimation.chefCat.frameDelay = 10;
-    // catAnimation.singleYarnCat.frameDelay = 5;
-    // catAnimation.doubleYarnCat.frameDelay = 30;
-    // catAnimation.iceCat.frameDelay = 5;
+    mouseAnimation.basicMouse = loadImage('assets/mouse/basic_mouse_ani.png');
+    mouseAnimation.helmetMouse = loadImage('assets/mouse/helmet_mouse_ani.png');
+    mouseAnimation.sportyMouse = loadImage('assets/mouse/sporty_mouse_ani.png');
+    mouseAnimation.bossMouse = loadImage('assets/mouse/boss_mouse_ani.png');
 }
 
 function setup() {
