@@ -14,19 +14,29 @@
     <script type="module" src="sketch.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <h1 id="title">Cats vs Mice</h1>
     <div id="gameFrame">
+        <div id="endingOverlay">
+            <h1 id="endingText">Congrats! You've finished level 1!</h1>
+            <button class="Button" id="quitButton">Quit Game</button>
+        </div>
         <div id="upperContainer">
             <div id="controlPanel">
                 <img src="assets/cheeseLabel.png" alt="Cheese Label" id="cheeseLabel">
+                
                 <div id="cheeseDisplay">
                     <img src="assets/cheese.png" alt="Cheese Icon" id="cheeseIcon">
                     <span id="cheeseCount">50</span>
                 </div>
+
                 <img src="assets/catsLabel.png" alt="Cat Label" id="catsLabel">
+
                 <div id="catToolbar">
                     <button class="catButton" id="chefCat">
                         <img src="assets/chef_cat_icon.png" alt="Chef Cat" class="catIcon" />
@@ -49,18 +59,24 @@
                         <span>150</span>
                     </button>
                 </div>
+
+                <span class="divider"></span>
+
                 <button class="catButton" id="petCage">
                     <img src="assets/petCage.png" alt="Pet Cage" id="cageIcon" />
                 </button>
 
+                <span class="divider"></span>
+
                 <div id="gameProgressWrapper">
-                    <progress id="gameProgress" value="0" max="100"></progress>
+                    <progress id="gameProgress" value="0" max="100"></progress> 
                     <label id="gameProgressLabel">Game Progress</label>
                 </div>
 
             </div>
         </div>
     </div>
+
     <button class="Button" id="startButton">Start Game</button>
     <button class="Button" id="menuButton">Menu</button>
 </body>

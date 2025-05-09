@@ -5,6 +5,7 @@ import { createCat, SleepyCat, sleepyCats, throwables } from './classes/Cat.js';
 import { createMouse } from './classes/Mouse.js';
 import { RobotVacuum } from './classes/RobotVacuum.js';
 import { level1Mice } from './level/Level1.js';
+import { showWinningScreen, showLosingScreen } from './level/WinLose.js';
 
 const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');
@@ -14,6 +15,7 @@ const gameProgress = document.getElementById('gameProgress');
 export const activeCats = [];
 export const activeMice = Array.from({ length: 5 }, () => []);
 const robotVacuums = [];
+let leftBar, rightBar, cheeseFeast;
 export let gameSprites = [];
 export let cheeses = [];
 export let grid = Array(5).fill().map(() => Array(9).fill(null));
@@ -40,6 +42,7 @@ function isCellValid(row, col) {
 export function GameScene() {
     this.enter = function() {
         select('#upperContainer').show();
+        select('#endingOverlay').hide();
         select('#menuButton').show();
         select('#startButton').hide();
 
@@ -51,6 +54,23 @@ export function GameScene() {
         controlPanel.style.height = (gameFrame.height - gridHeight - 3 * gameFrame.border) + 'px';
 
         gameSprites = [];   // kayanya ga butuh, sama kayak allSprites
+
+        leftBar = createSprite(gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
+        leftBar.color = Colors.dark_brown;
+        leftBar.layer = 10;
+        leftBar.overlaps(allSprites);
+        gameSprites.push(leftBar);
+
+        rightBar = createSprite(width - gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
+        rightBar.color = Colors.dark_brown;
+        rightBar.layer = 10;
+        rightBar.overlaps(allSprites);
+        gameSprites.push(rightBar);
+
+        cheeseFeast = createSprite(gameFrame.tileWidth / 4, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.tileWidth / 2, gameFrame.tileHeight * 5);
+        cheeseFeast.opacity = 0;
+        cheeseFeast.overlaps(mouseGroup);
+        gameSprites.push(cheeseFeast)
 
         for (let row = 0; row < gameFrame.rows; row ++) {
             let x = gameFrame.paddingRobot + gameFrame.robotSize / 2;
@@ -111,6 +131,11 @@ export function GameScene() {
             for (let i = 0; i < activeMice[row].length; i++) {
                 const currMouse = activeMice[row][i];
                 currMouse.attack();
+
+                if (cheeseFeast.overlaps(currMouse.sprite)) {
+                    showLosingScreen();
+                }
+
                 sleepyCats.forEach((cat) => {
                     if (cat.sprite.overlaps(currMouse.sprite)) {
                         cat.awake = true;
@@ -227,13 +252,13 @@ function updateCheeseCount(n) {
 function spawnMouse(type, row) {
     let x = width;
     let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
-
+    
     let newMouse = new createMouse(type, x, y, row);
     if (newMouse) {
         activeMice[row].push(newMouse);
         if (type == 'bossMouse') {
             if (row - 1 >= 0) activeMice[row - 1].push(newMouse);
-            if (row + 1 >= gameFrame.rows) activeMice[row + 1].push(newMouse);
+            if (row + 1 < gameFrame.rows) activeMice[row + 1].push(newMouse);
         }
         mouseGroup.add(newMouse.sprite);
         gameSprites.push(newMouse.sprite);
@@ -244,6 +269,10 @@ export function updateProgressBar() {
     miceKilled++;
     const percentage = Math.floor((miceKilled / level1Mice.length) * 100);
     gameProgress.value = percentage;
+
+    if (percentage >= 100) {
+        showWinningScreen();
+    }
     console.log(`killed ${miceKilled} out of ${level1Mice.length}, % = ${percentage}`);
 }
 
@@ -260,7 +289,7 @@ function updateCatButtons() {
         const catType = button.id;
         const cost = catCosts[catType];
 
-        if (int(cheeseCount.textContent) < cost) {
+        if (parseInt(cheeseCount.textContent) < cost) {
             button.disabled = true;
             button.style.cursor = 'not-allowed';
             button.style.opacity = '0.5';

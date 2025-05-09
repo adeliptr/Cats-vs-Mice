@@ -4,7 +4,7 @@ import { GameScene } from './GameScene.js';
 export let mgr;
 const gameParent = document.getElementById('gameFrame');
 const startButton = document.getElementById('startButton');
-export let startPageAni, robotVacuum, gameBackground;
+export let startPageAni;
 export const imageAssets = {};
 export const catImages = {};
 export const catAnimation = {};
@@ -16,14 +16,12 @@ function preload() {
         width: 1440, height: 1024, frames: 5
     });
     startPageAni.frameDelay = 10;
-    robotVacuum = loadImage('assets/robot_vacuum.png');
-    gameBackground = loadImage('assets/gamebg3.png');
 
     imageAssets.cheese = loadImage('assets/cheese.png');
     imageAssets.yarn = loadImage('assets/yarn.png');
     imageAssets.snowball = loadImage('assets/snowball.png');
     imageAssets.robotVacuum = loadImage('assets/robot_vacuum.png');
-    imageAssets.gameBackground = loadImage('assets/gamebg3.png');
+    imageAssets.gameBackground = loadImage('assets/game_background.png');
     imageAssets.mouse = loadImage('assets/mouse.png');
     imageAssets.redExplosion = loadImage('assets/red_explosion.png');
     imageAssets.grayExplosion = loadImage('assets/gray_explosion.png');
@@ -82,6 +80,11 @@ startButton.addEventListener('click', function (event) {
 });
 
 menuButton.addEventListener('click', function (event) {
+    event.preventDefault();
+    mgr.showScene(StartScene);
+});
+
+quitButton.addEventListener('click', function (event) {
     event.preventDefault();
     mgr.showScene(StartScene);
 });

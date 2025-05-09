@@ -5,6 +5,7 @@ export function StartScene() {
         const self = this;
 
         select('#upperContainer').hide();
+        select('#endingOverlay').hide();
         select('#menuButton').hide();
         select('#startButton').show();
     }
