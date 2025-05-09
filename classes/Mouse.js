@@ -1,6 +1,6 @@
 import { gameFrame } from '../constants/Prototype.js';
 import { mouseAnimation } from '../sketch.js';
-import { activeMice, mouseGroup } from '../GameScene.js';
+import { activeMice, mouseGroup, updateProgressBar } from '../GameScene.js';
 
 const mouseAniDesc = {
     idle: { row: 0, frameSize: [200, 200] },
@@ -24,14 +24,29 @@ class Mouse {
         this.targetCat = undefined;
         this.lastAttack = 0;
         this.defaultSpeed = speed;
-        this.defaultHP = HP
+        this.defaultHP = HP;
+        this.isAlive = true;
     }
     
     remove() {
         this.sprite.remove();
-        const index = activeMice[this.row].indexOf(this);
+        let index = activeMice[this.row].indexOf(this);
         if (index != -1) {
             activeMice[this.row].splice(index, 1);
+        }
+        if (this.defaultHP = 1000) {
+            if (this.row - 1 >= 0) {
+                index = activeMice[this.row - 1].indexOf(this);
+                if (index != -1) activeMice[this.row - 1].splice(index, 1);
+            }
+            if (this.row + 1 < gameFrame.rows) {
+                index = activeMice[this.row + 1].indexOf(this);
+                if (index != -1) activeMice[this.row + 1].splice(index, 1);
+            }
+        }
+        if (this.isAlive) {
+            this.isAlive = false;
+            updateProgressBar();
         }
     }
 
@@ -53,6 +68,7 @@ class Mouse {
 
     attacked(point) {
         this.HP -= point;
+        console.log(`I'm being attacked by ${point} points and my HP is now ${this.HP}`)
         if (this.HP <= 0) this.remove();
         else {
             this.sprite.opacity = (this.HP / this.defaultHP) * 0.5 + 0.5;
@@ -74,13 +90,13 @@ class HelmetMouse extends Mouse {
 
 class SportyMouse extends Mouse {
     constructor(x, y, row) {
-        super(x, y, row, -0.25, 75, 20, mouseAnimation.sportyMouse, gameFrame.tileWidth);
+        super(x, y, row, -0.3, 85, 20, mouseAnimation.sportyMouse, gameFrame.tileWidth);
     }
 }
 
 class BossMouse extends Mouse {
     constructor(x, y, row) {
-        super(x, y, row, -0.05, 500, 50, mouseAnimation.bossMouse, 3 * gameFrame.tileWidth);
+        super(x, y, row, -0.05, 1000, 50, mouseAnimation.bossMouse, 3 * gameFrame.tileWidth);
     }
 }
 

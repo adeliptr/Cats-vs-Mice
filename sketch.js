@@ -3,7 +3,6 @@ import { GameScene } from './GameScene.js';
 
 export let mgr;
 const gameParent = document.getElementById('gameFrame');
-const controlPanel = document.getElementById('controlPanel');
 const startButton = document.getElementById('startButton');
 export let startPageAni, robotVacuum, gameBackground;
 export const imageAssets = {};
@@ -92,7 +91,6 @@ document.querySelectorAll('.catButton').forEach(button => {
         if (selectedCatType === button.id) {
             selectedCatType = null;
             button.classList.remove('activeButton');
-            // document.body.style.cursor = 'default';
         }
         else {
             selectedCatType = button.id;
@@ -100,10 +98,6 @@ document.querySelectorAll('.catButton').forEach(button => {
                 btn.classList.remove('activeButton')
             );
             button.classList.add('activeButton');
-            // const img = button.querySelector('img');
-            // if (img) {
-            //     document.body.style.cursor = `url(${img.src}) 32 32, auto`;
-            // }
         }
         console.log('Selected cat type:', selectedCatType);
     });

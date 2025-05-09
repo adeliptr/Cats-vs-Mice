@@ -16,21 +16,17 @@
     <link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
-<!-- <script defer src="sketch.js"></script> -->
-
 <body>
     <h1 id="title">Cats vs Mice</h1>
     <div id="gameFrame">
         <div id="upperContainer">
             <div id="controlPanel">
-                <!-- <img src="assets/cheeseLabel.png" alt="Cheese Label" id="cheeseLabel"> -->
-                <label>CH</label>
+                <img src="assets/cheeseLabel.png" alt="Cheese Label" id="cheeseLabel">
                 <div id="cheeseDisplay">
-                    <img src="assets/cheese.png" alt="cheeseIcon" class="buttonIcon" id="cheeseIcon">
+                    <img src="assets/cheese.png" alt="Cheese Icon" id="cheeseIcon">
                     <span id="cheeseCount">50</span>
                 </div>
-                <!-- <img src="assets/catsLabel.png" alt="Cat Label" id="cheeseLabel"> -->
-                <label>CA</label>
+                <img src="assets/catsLabel.png" alt="Cat Label" id="catsLabel">
                 <div id="catToolbar">
                     <button class="catButton" id="chefCat">
                         <img src="assets/chef_cat_icon.png" alt="Chef Cat" class="catIcon" />
@@ -54,13 +50,14 @@
                     </button>
                 </div>
                 <button class="catButton" id="petCage">
-                    <img src="assets/petCage.png" alt="Pet Cage" class="catIcon" />
-                    <span>200</span>
+                    <img src="assets/petCage.png" alt="Pet Cage" id="cageIcon" />
                 </button>
-                <!-- <div id="gameProgressWrapper">
-                    <progress id="gameProgress" value="30" max="100"></progress>
-                    <label>Game Progress</label>
-                </div> -->
+
+                <div id="gameProgressWrapper">
+                    <progress id="gameProgress" value="0" max="100"></progress>
+                    <label id="gameProgressLabel">Game Progress</label>
+                </div>
+
             </div>
         </div>
     </div>

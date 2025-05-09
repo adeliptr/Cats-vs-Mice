@@ -17,7 +17,7 @@ export class RobotVacuum {
     action() {
         if (!this.activated) {
             this.activated = true;
-            this.sprite.vel.x = 1;
+            this.sprite.vel.x = 2;
         }
         
         for (let i = 0; i < activeMice[this.row].length; i++) {

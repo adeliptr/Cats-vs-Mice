@@ -19,12 +19,11 @@ body {
 
 #gameFrame {
     position: relative;
-    flex-shrink: 0;
+    /* flex-shrink: 0; */
     max-width: 800px;
     width: 60vw;
     aspect-ratio: 800/569;
     border-radius: 35px;
-    /* border: 10px solid #000; */
     background: #FFFEF9;
     overflow: hidden;
 }
@@ -34,16 +33,18 @@ canvas {
     width: 100%;
     height: 100%;
     border-radius: 25px;
-    /* border: 1px solid #000; */
     z-index: 0;
 }
 
 #upperContainer {
     position: absolute;
+    display: flex;
+    flex-direction: row;
     gap: 16px;
     align-items: center;
     background: var(--med-brown);
     border-radius: 25px 25px 0 0;
+    width: 100%;
 }
 
 #controlPanel {
@@ -51,13 +52,18 @@ canvas {
     border-radius: 30px 30px 0 0;
     display: flex;
     flex-direction: row;
-    gap: 4px;
+    gap: 10px;  
+    /* TODO: ganti ke % apa ya, 10px magic number bgt */
     align-items: center;
 }
 
 #cheeseLabel {
     margin-left: 20px;
-    width: 2.6%;
+    height: 100%;
+}
+
+#catsLabel {
+    height: 100%;
 }
 
 #cheeseDisplay {
@@ -72,16 +78,13 @@ canvas {
     align-items: center;
 }
 
-.buttonIcon {
-    width: 60%
-}
-
 #catToolbar {
     display: flex;
     flex-direction: row;
     height: 100%;
-    width: 46%;
-    gap: 1px;
+    width: auto;
+    aspect-ratio: 330/83;
+    /* gap: 1px; */
     background: var(--light-brown);
     /* padding: 4px 8px; */
     border-radius: 6px;
@@ -106,7 +109,7 @@ canvas {
     color: #333;
 }
 
-.catButton:hover {
+.catButton:not(:disabled):hover {
     background: var(--dark-yellow);
 }
 
@@ -117,7 +120,8 @@ canvas {
 #petCage {
     height: 100%;
     width: auto;
-    aspect-ratio: 66/83;
+    aspect-ratio: 60/83;
+    justify-content: center;
 }
 
 .catIcon {
@@ -126,8 +130,14 @@ canvas {
     object-fit: contain;
 }
 
-.cheeseIcon {
-    width: 80%;
+#cageIcon {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+#cheeseIcon {
+    width: 50%;
     height: auto;
     object-fit: contain;
 }
@@ -136,11 +146,31 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 50%;
 }
 
 #gameProgress {
-    width: 100px;
-    height: 10px;
+    appearance: none;
+    border-radius: 100px;
+    background-color: var(--dark-brown);
+    border: 4px solid #4b392b;
+    overflow: hidden;
+}
+
+#gameProgress::-webkit-progress-bar {
+    background-color: var(--dark-brown);
+    border-radius: 100px;
+}
+
+#gameProgress::-webkit-progress-value {
+    background-color: var(--dark-yellow);
+    border-radius: 100px;
+}
+
+#gameProgressLabel {
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 #gameBackground {

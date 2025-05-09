@@ -1,6 +1,6 @@
 import { gameFrame } from '../constants/Prototype.js';
 import { catAnimation, imageAssets } from '../sketch.js';
-import { grid, cheeses, activeCats, activeMice, calculateCell, mouseGroup, throwableGroup, catGroup } from '../GameScene.js';
+import { grid, cheeses, activeCats, activeMice, calculateCell, mouseGroup, throwableGroup, gameSprites } from '../GameScene.js';
 import { Yarn, Snowball } from './Throwable.js';
 
 export const throwables = [];
@@ -98,6 +98,7 @@ class Cat {
 
     addExplosion(spriteSheet) {
         this.explosion = createSprite(this.x, this.y, this.width, this.width);
+        gameSprites.push(this.explosion);
         this.explosion.spriteSheet = spriteSheet;
         this.explosion.scale = gameFrame.catRatio;
         this.explosion.life = 90;
@@ -119,13 +120,13 @@ class ChefCat extends Cat {
     action() {
         // Produces 25 cheese every 10 seconds, cheese.png pop in front of the chefCat
         if (millis() - this.lastProduced > 10000) {
-            console.log(`produces Cheese!`)
             const cheese = createSprite(this.x + this.width / 4 + this.offset * this.width / 20, this.y + this.width / 3 + this.offset * this.width / 20);
             cheese.scale = this.width / 216;
             cheese.image = imageAssets.cheese;
             cheese.collider = 'static';
             cheese.overlaps(mouseGroup);
             cheeses.push(cheese);
+            gameSprites.push(cheese);
             this.lastProduced = millis();
             this.offset = (this.offset + 1) % 3;
         }
@@ -188,10 +189,11 @@ class DoubleYarnCat extends Cat {
     }
 }
 
-class SleepyCat extends Cat {
+export class SleepyCat extends Cat {
     constructor(x, y) {
         super(x, y, 150, catAnimation.sleepyCat, catAniDesc.sleepyCat);
         this.awake = false;
+        this.hasAttacked = false;
         this.wakeStart = undefined;
         this.targetMouse = undefined;
     }
@@ -208,8 +210,10 @@ class SleepyCat extends Cat {
         }
 
         if (this.wakeStart != undefined) {
-            if (millis() - this.wakeStart > 900) {
-                if (this.targetMouse) this.targetMouse.remove();
+            if (!this.hasAttacked && this.targetMouse && millis() - this.wakeStart > 900) {
+                this.targetMouse.attacked(150);
+                if (this.targetMouse && this.targetMouse.HP > 0) this.targetMouse.sprite.changeAni('walk');
+                this.hasAttacked = true;
             }
             if (millis() - this.wakeStart > 1480) {
                 this.remove();

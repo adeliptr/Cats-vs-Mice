@@ -1,7 +1,7 @@
 import { prototypeFrame, gameFrame } from './constants/Prototype.js';
 import { Colors } from './constants/Colors.js';
 import { imageAssets, selectedCatType, resetCatType } from './sketch.js';
-import { createCat, sleepyCats, throwables } from './classes/Cat.js';
+import { createCat, SleepyCat, sleepyCats, throwables } from './classes/Cat.js';
 import { createMouse } from './classes/Mouse.js';
 import { RobotVacuum } from './classes/RobotVacuum.js';
 import { level1Mice } from './level/Level1.js';
@@ -10,14 +10,16 @@ const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');
 const controlPanel = document.getElementById('controlPanel');
 const cheeseCount = document.getElementById('cheeseCount');
+const gameProgress = document.getElementById('gameProgress');
 export const activeCats = [];
 export const activeMice = Array.from({ length: 5 }, () => []);
 const robotVacuums = [];
-let gameSprites = [];
+export let gameSprites = [];
 export let cheeses = [];
 export let grid = Array(5).fill().map(() => Array(9).fill(null));
 let startTime;
 let levelMice = [...level1Mice];
+export let miceKilled = 0;
 export let catGroup, mouseGroup, throwableGroup, cheeseGroup;
 
 export function calculateCell(mouseX, mouseY) {
@@ -61,6 +63,7 @@ export function GameScene() {
         }
 
         startTime = millis() / 1000;
+        cheeseCount.textContent = 50;
     }
 
     this.setup = function() {
@@ -91,6 +94,7 @@ export function GameScene() {
         strokeWeight(gameFrame.border);
         // fix the border radius --> create a ratio for it
         rect(gameFrame.border / 2, gameFrame.border / 2, width - gameFrame.border, height - gameFrame.border, 35);
+        updateCatButtons();
         drawGrid();
 
         let currTime = millis() / 1000 - startTime;
@@ -111,12 +115,11 @@ export function GameScene() {
                     if (cat.sprite.overlaps(currMouse.sprite)) {
                         cat.awake = true;
                         cat.action(currMouse);
-                        activeMice[row].splice(i, 1);
                     }
                 })
 
                 activeCats.forEach((cat) => {
-                    if (cat.sprite.overlaps(currMouse.sprite)) {
+                    if (!(cat instanceof SleepyCat) && cat.sprite.overlaps(currMouse.sprite)) {
                         currMouse.targetCat = cat;
                         console.log(`seting targetCat to ${currMouse.targetCat}`);
                     }
@@ -152,7 +155,6 @@ export function GameScene() {
             const cat = grid[row][col];
             if (cat) {
                 cat.remove();
-                // TODO: need to remove from activeCats too
                 const index = activeCats.indexOf(cat);
                 if (index !== -1) {
                     activeCats.splice(index, 1);
@@ -169,7 +171,7 @@ export function GameScene() {
                 grid[row][col] = newCat;
                 activeCats.push(newCat);
                 catGroup.add(newCat.sprite);
-                gameSprites.push(newCat.sprite); // Is this redundant? kedouble2
+                gameSprites.push(newCat.sprite);
                 updateCheeseCount(-newCat.cost);
                 resetCatType();
             }
@@ -204,13 +206,11 @@ export function GameScene() {
                     mouseX > x && mouseX < x + gameFrame.tileWidth &&
                     mouseY > y && mouseY < y + gameFrame.tileHeight
                 );
+                
+                if (isHovering && selectedCatType && selectedCatType === 'petCage' && grid[row][col] != null) fill('red');
+                else if (isHovering && selectedCatType && selectedCatType != 'petCage' && grid[row][col] == null) fill('red');
+                else fill((row + col) % 2 === 0 ? Colors.dark_yellow : Colors.light_yellow);
 
-                if (isHovering && selectedCatType && grid[row][col] == null) {
-                    fill('red');
-                }
-                else {
-                    fill((row + col) % 2 === 0 ? Colors.dark_yellow : Colors.light_yellow);
-                }
                 noStroke();
                 rect(x, y, gameFrame.tileWidth, gameFrame.tileHeight);
             }
@@ -219,11 +219,9 @@ export function GameScene() {
 }
 
 function updateCheeseCount(n) {
-    console.log(`update cheeseCount by ${n}`)
     let currCheese = int(cheeseCount.textContent);
     currCheese += n;
     cheeseCount.textContent = currCheese;
-    // TODO: handle if n is negative and currCheese < -n somewhere else
 }
 
 function spawnMouse(type, row) {
@@ -233,7 +231,44 @@ function spawnMouse(type, row) {
     let newMouse = new createMouse(type, x, y, row);
     if (newMouse) {
         activeMice[row].push(newMouse);
+        if (type == 'bossMouse') {
+            if (row - 1 >= 0) activeMice[row - 1].push(newMouse);
+            if (row + 1 >= gameFrame.rows) activeMice[row + 1].push(newMouse);
+        }
         mouseGroup.add(newMouse.sprite);
-        gameSprites.push(newMouse.sprite); // Is this redundant? kedouble2 sama allSprites
+        gameSprites.push(newMouse.sprite);
     }
+}
+
+export function updateProgressBar() {
+    miceKilled++;
+    const percentage = Math.floor((miceKilled / level1Mice.length) * 100);
+    gameProgress.value = percentage;
+    console.log(`killed ${miceKilled} out of ${level1Mice.length}, % = ${percentage}`);
+}
+
+const catCosts = {
+    chefCat: 50,
+    singleYarnCat: 100,
+    doubleYarnCat: 200,
+    sleepyCat: 150,
+    iceCat: 150
+};
+
+function updateCatButtons() {
+    document.querySelectorAll('.catButton').forEach(button => {
+        const catType = button.id;
+        const cost = catCosts[catType];
+
+        if (int(cheeseCount.textContent) < cost) {
+            button.disabled = true;
+            button.style.cursor = 'not-allowed';
+            button.style.opacity = '0.5';
+        }
+        else {
+            button.disabled = false;
+            button.style.opacity = '1';
+            button.style.cursor = 'pointer';
+        }
+    })
 }
