@@ -1,10 +1,10 @@
 import { gameFrame } from '../constants/Prototype.js';
 import { catAnimation, imageAssets } from '../sketch.js';
-import { grid, cheeses, activeCats, activeMice, calculateCell, mouseGroup, throwableGroup, gameSprites } from '../GameScene.js';
+import { grid, cheeses, activeCats, activeMice, mouseGroup, throwableGroup, gameSprites } from '../GameScene.js';
 import { Yarn, Snowball } from './Throwable.js';
+import { calculateCell } from '../Helper.js';
 
 export const throwables = [];
-export const sleepyCats = [];
 const catAniDesc = {
     chefCat: {
         idle: { row: 0, frames: 4, frameSize: [200, 200], frameDelay: 10 },
@@ -31,7 +31,19 @@ const catAniDesc = {
     }
 }
 
+/**
+ * Cat class representing a cat character in the game
+ */
 class Cat {
+    /**
+     * Creates an iinstance of a Cat
+     * 
+     * @param {number} x - The x-coordinate of the cat's position
+     * @param {number} y - The y-coordinate of the cat's position
+     * @param {number} cost - The cost of placing the cat
+     * @param {p5.SpriteSheet} spriteSheet - The sprite sheet for the cat's animations
+     * @param {Object} ani - Animation details for the cat
+     */
     constructor(x, y, cost, spriteSheet, ani) {
         // (x, y) is the center of the grid
         this.width = 1.2 * gameFrame.tileWidth;
@@ -57,16 +69,26 @@ class Cat {
         this.col = col;
     }
 
+    /**
+     * Switches the cat's animation to 'idle' state
+     */
     switchToIdle() {
         this.sprite.changeAni('idle');
         this.active = false;
     }
     
+    /**
+     * Switches the cat's animation to 'action' state
+     */
     switchToAction() {
         this.sprite.changeAni('action');
         this.active = true;
     }
 
+    /**
+     * Called when the cat is attacked by a mouse
+     * @param {Object} mouse - The mouse attacking the cat
+     */
     attacked(mouse) {
         this.addExplosion(imageAssets.grayExplosion);
         this.explosion = undefined;
@@ -82,20 +104,30 @@ class Cat {
         }, 1500);
     }
 
-    changeAni(name) {
-        this.sprite.changeAni(name);
-    }
-
+    /**
+     * Removes the cat from the game
+     */
     remove() {
         this.sprite.remove();
         grid[this.row][this.col] = null;
 
-        const index = activeCats.indexOf(this);
+        let index = activeCats.indexOf(this);
         if (index !== -1) {
             activeCats.splice(index, 1);
         }
+
+        index = gameSprites.indexOf(this);
+        if (index !== -1) {
+            gameSprites.splice(index, 1);
+        }
     }
 
+    /**
+     * Adds an explosion animation to the cat
+     * SleepyCat - Red explosion when it overlaps with a mouse
+     * Other Cats - Gray explosion when it is attacked by a mouse
+     * @param {p5.SpriteSheet} spriteSheet - The sprite sheet for the explosion
+     */
     addExplosion(spriteSheet) {
         this.explosion = createSprite(this.x, this.y, this.width, this.width);
         gameSprites.push(this.explosion);
@@ -105,11 +137,12 @@ class Cat {
         this.explosion.collider = 'none';
         this.explosion.addAnis(catAniDesc.explosion);
         this.explosion.changeAni('action');
-        // this.explosion.overlaps(mouseGroup);
-        // this.explosion.overlaps(catGroup);
     }
 }
 
+/**
+ * Cat that generates cheese periodically for resources
+ */
 class ChefCat extends Cat {
     constructor(x, y) {
         super(x, y, 50, catAnimation.chefCat, catAniDesc.chefCat);
@@ -118,13 +151,14 @@ class ChefCat extends Cat {
     }
 
     action() {
-        // Produces 25 cheese every 10 seconds, cheese.png pop in front of the chefCat
+        // Produces 25 cheese every 10 seconds
         if (millis() - this.lastProduced > 10000) {
             const cheese = createSprite(this.x + this.width / 4 + this.offset * this.width / 20, this.y + this.width / 3 + this.offset * this.width / 20);
             cheese.scale = this.width / 216;
             cheese.image = imageAssets.cheese;
             cheese.collider = 'static';
             cheese.overlaps(mouseGroup);
+
             cheeses.push(cheese);
             gameSprites.push(cheese);
             this.lastProduced = millis();
@@ -133,6 +167,9 @@ class ChefCat extends Cat {
     }
 }
 
+/**
+ * Cat that throws a single yarn at mice every 3 seconds
+ */
 class SingleYarnCat extends Cat {
     constructor(x, y) {
         super(x, y, 100, catAnimation.singleYarnCat, catAniDesc.singleYarnCat);
@@ -140,7 +177,6 @@ class SingleYarnCat extends Cat {
     }
 
     action() {
-        // Throw yarn every 3 seconds -> yarn has velocity x of 1 (to the right)
         if (activeMice[this.row].length > 0) this.switchToAction();
         else this.switchToIdle();
 
@@ -159,6 +195,9 @@ class SingleYarnCat extends Cat {
     }
 }
 
+/**
+ * Cat that throws 2 yarns at mice every 3 seconds
+ */
 class DoubleYarnCat extends Cat {
     constructor(x, y) {
         super(x, y, 200, catAnimation.doubleYarnCat, catAniDesc.doubleYarnCat);
@@ -166,14 +205,12 @@ class DoubleYarnCat extends Cat {
     }
 
     action() {
-        // Throw 2 yarns every 3 seconds -> yarn has velocity x of 1 (to the right)
-
         if (activeMice[this.row].length > 0) this.switchToAction();
         else this.switchToIdle();
 
         if (this.active && (millis() - this.lastShot > 3000)) {
             // TODO: check on the offset again
-            for (let offset of [0, 20]) {
+            for (let offset of [0, 0.3 * gameFrame.tileWidth]) {
                 let yarnX = this.x + gameFrame.tileWidth / 2 + offset;
                 let yarnY = this.y;
 
@@ -189,6 +226,9 @@ class DoubleYarnCat extends Cat {
     }
 }
 
+/**
+ * Cat that activates when overlapping with a mouse and explodes, damaging the enemy by 150 points
+ */
 export class SleepyCat extends Cat {
     constructor(x, y) {
         super(x, y, 150, catAnimation.sleepyCat, catAniDesc.sleepyCat);
@@ -200,7 +240,7 @@ export class SleepyCat extends Cat {
 
     action(targetMouse) {
         if (this.awake) {
-            this.changeAni('action');
+            this.switchToAction();
             this.addExplosion(imageAssets.redExplosion);
             this.wakeStart = millis();
             this.targetMouse = targetMouse;
@@ -224,6 +264,9 @@ export class SleepyCat extends Cat {
     }
 }
 
+/**
+ * Cat that throws snowballs at mice every 3 seconds
+ */
 class IceCat extends Cat {
     constructor(x, y) {
         super(x, y, 150, catAnimation.iceCat, catAniDesc.iceCat);
@@ -231,8 +274,6 @@ class IceCat extends Cat {
     }
 
     action() {
-        // Throw snowball every 3 seconds -> snowball has velocity x of 1 (to the right)
-
         if (activeMice[this.row].length > 0) this.switchToAction();
         else this.switchToIdle();
 
@@ -251,6 +292,13 @@ class IceCat extends Cat {
     }
 }
 
+/**
+ * Factory function to create different types of cats
+ * @param {string} type - The type of cat to create. One of 'chefCat', 'singleYarnCat', 'doubleYarnCat', 'sleepyCat', 'iceCat'
+ * @param {number} x - The x-coordinate
+ * @param {number} y - The y-coordinate
+ * @returns {Cat|undefined} The created cat instance or undefined if type is invalid
+ */
 export function createCat(type, x, y) {
     switch (type) {
         case 'chefCat':
@@ -262,9 +310,7 @@ export function createCat(type, x, y) {
         case 'doubleYarnCat':
             return new DoubleYarnCat(x, y);
         case 'sleepyCat':
-            const sleepyCat = new SleepyCat(x, y);
-            if (sleepyCat) sleepyCats.push(sleepyCat);
-            return sleepyCat;
+            return new SleepyCat(x, y);
         case 'iceCat':
             return new IceCat(x, y);
         default:

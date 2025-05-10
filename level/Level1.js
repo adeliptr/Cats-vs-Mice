@@ -1,6 +1,5 @@
 export const level1Mice = [
     // First 30 seconds — Setup Time (no mice)
-    // { time: 5, type: 'basicMouse', row: 2 },
 
     // First minute (30 - 89) — Basic Mice only
     { time: 30, type: 'basicMouse', row: 2 },
@@ -53,6 +52,7 @@ export const level1Mice = [
     { time: 296, type: 'sportyMouse', row: 2},
     { time: 299, type: 'basicMouse', row: 4 },
     { time: 303, type: 'helmetMouse', row: 2 },
+    { time: 305, type: 'bossMouse', row: 3},
     { time: 307, type: 'sportyMouse', row: 0 },
     { time: 310, type: 'sportyMouse', row: 1 },
     { time: 312, type: 'basicMouse', row: 0},

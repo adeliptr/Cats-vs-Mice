@@ -16,7 +16,7 @@
     <link rel="stylesheet" type="text/css" href="css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Paytone+One&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -24,7 +24,7 @@
     <div id="gameFrame">
         <div id="endingOverlay">
             <h1 id="endingText">Congrats! You've finished level 1!</h1>
-            <button class="Button" id="quitButton">Quit Game</button>
+            <button class="Button" id="quitGameButton">Quit Game</button>
         </div>
         <div id="upperContainer">
             <div id="controlPanel">
@@ -65,19 +65,18 @@
                 <button class="catButton" id="petCage">
                     <img src="assets/petCage.png" alt="Pet Cage" id="cageIcon" />
                 </button>
-
-                <span class="divider"></span>
-
-                <div id="gameProgressWrapper">
-                    <progress id="gameProgress" value="0" max="100"></progress> 
-                    <label id="gameProgressLabel">Game Progress</label>
-                </div>
-
+            </div>
+            <div id="gameProgressWrapper">
+                <progress id="gameProgress" value="0" max="100"></progress> 
+                <label id="gameProgressLabel">Game Progress</label>
             </div>
         </div>
     </div>
 
     <button class="Button" id="startButton">Start Game</button>
-    <button class="Button" id="menuButton">Menu</button>
+    <div id="menuButton">
+        <button class="Button" id="restartButton">Restart Game</button>
+        <button class="Button" id="quitButton">Quit Game</button>
+    </div>
 </body>
 </html>

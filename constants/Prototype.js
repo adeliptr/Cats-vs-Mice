@@ -1,3 +1,4 @@
+// Numbers from the prototype designed on Figma
 export const prototypeFrame = {
     border: 10,
     width: 800,
@@ -13,6 +14,7 @@ export const prototypeFrame = {
     controlPanelGap: 8
 }
 
+// Numbers used in the actual gameFrame
 export const gameFrame = {
     x: 0,
     y: 0,

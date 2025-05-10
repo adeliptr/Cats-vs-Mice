@@ -11,6 +11,7 @@ export class Throwable {
         this.sprite.vel.x = 1;
         this.sprite.rotationSpeed = 1;
         this.sprite.life = 600;
+        
         this.point = point;
         this.width = width;
     }
@@ -20,12 +21,14 @@ export class Throwable {
     }
 }
 
+// Yarn is thrown by singleYarnCat and doubleYarnCat
 export class Yarn extends Throwable {
     constructor(x, y) {
         super(x, y, 15, imageAssets.yarn, gameFrame.tileWidth / 4);
     }
 }
 
+// Snowball is thrown by IceCat
 export class Snowball extends Throwable {
     constructor(x, y) {
         super(x, y, 20, imageAssets.snowball, gameFrame.tileWidth / 4);

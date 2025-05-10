@@ -1,89 +1,36 @@
 import { prototypeFrame, gameFrame } from './constants/Prototype.js';
 import { Colors } from './constants/Colors.js';
 import { imageAssets, selectedCatType, resetCatType } from './sketch.js';
-import { createCat, SleepyCat, sleepyCats, throwables } from './classes/Cat.js';
-import { createMouse } from './classes/Mouse.js';
-import { RobotVacuum } from './classes/RobotVacuum.js';
+import { createCat, SleepyCat, throwables } from './classes/Cat.js';
+import { spawnMouse } from './classes/Mouse.js';
+import { drawRobotVacuums } from './classes/RobotVacuum.js';
 import { level1Mice } from './level/Level1.js';
-import { showWinningScreen, showLosingScreen } from './level/WinLose.js';
+import { showLosingScreen } from './level/WinLose.js';
+import { updateCatButtons, updateCheeseCount } from './Controller.js';
+import { calculateCell, isCellValid } from './Helper.js';
 
 const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');
 const controlPanel = document.getElementById('controlPanel');
 const cheeseCount = document.getElementById('cheeseCount');
-const gameProgress = document.getElementById('gameProgress');
-export const activeCats = [];
-export const activeMice = Array.from({ length: 5 }, () => []);
-const robotVacuums = [];
-let leftBar, rightBar, cheeseFeast;
+const menuButton = document.getElementById('menuButton');
+
+export let activeCats, activeMice, robotVacuums, cheeses, grid, levelMice;
 export let gameSprites = [];
-export let cheeses = [];
-export let grid = Array(5).fill().map(() => Array(9).fill(null));
+export let catGroup, mouseGroup, throwableGroup;
+let leftBar, rightBar, cheeseFeast;
 let startTime;
-let levelMice = [...level1Mice];
-export let miceKilled = 0;
-export let catGroup, mouseGroup, throwableGroup, cheeseGroup;
-
-export function calculateCell(mouseX, mouseY) {
-    let col = floor((mouseX - gameFrame.padding_left) / gameFrame.tileWidth)
-    let row = floor((mouseY - gameFrame.padding_up) / gameFrame.tileHeight)
-    
-    return {row, col};
-}
-
-function isCellValid(row, col) {
-    if (row < 0) return false;
-    if (row >= gameFrame.rows) return false;
-    if (col < 0) return false;
-    if (col >= gameFrame.cols) return false;
-    return true;
-}
 
 export function GameScene() {
     this.enter = function() {
-        select('#upperContainer').show();
         select('#endingOverlay').hide();
-        select('#menuButton').show();
         select('#startButton').hide();
+        upperContainer.style.display = 'flex';
+        menuButton.style.display = 'flex';
 
-        upperContainer.style.width = width + 'px';
-        const gridHeight = gameFrame.rows * gameFrame.tileHeight;
-        upperContainer.style.height = (gameFrame.height - gridHeight - gameFrame.border) + 'px';
-
-        controlPanel.style.margin = gameFrame.border + 'px';
-        controlPanel.style.height = (gameFrame.height - gridHeight - 3 * gameFrame.border) + 'px';
-
-        gameSprites = [];   // kayanya ga butuh, sama kayak allSprites
-
-        leftBar = createSprite(gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
-        leftBar.color = Colors.dark_brown;
-        leftBar.layer = 10;
-        leftBar.overlaps(allSprites);
-        gameSprites.push(leftBar);
-
-        rightBar = createSprite(width - gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
-        rightBar.color = Colors.dark_brown;
-        rightBar.layer = 10;
-        rightBar.overlaps(allSprites);
-        gameSprites.push(rightBar);
-
-        cheeseFeast = createSprite(gameFrame.tileWidth / 4, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.tileWidth / 2, gameFrame.tileHeight * 5);
-        cheeseFeast.opacity = 0;
-        cheeseFeast.overlaps(mouseGroup);
-        gameSprites.push(cheeseFeast)
-
-        for (let row = 0; row < gameFrame.rows; row ++) {
-            let x = gameFrame.paddingRobot + gameFrame.robotSize / 2;
-            let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
-
-            let vacuum = new RobotVacuum(x, y, row);
-
-            gameSprites.push(vacuum.sprite);
-            robotVacuums.push(vacuum);
-        }
-
-        startTime = millis() / 1000;
-        cheeseCount.textContent = 50;
+        resetGame();
+        drawSideBars();
+        drawRobotVacuums();
     }
 
     this.setup = function() {
@@ -100,20 +47,16 @@ export function GameScene() {
 
         gameFrame.catRatio = 1.2 * gameFrame.tileWidth/200;
 
-        catGroup = new Group();
-        mouseGroup = new Group();
-        throwableGroup = new Group();
-        cheeseGroup = new Group();
+        resizeFrame();
     }
 
     this.draw = function() {
         clear();
         image(imageAssets.gameBackground, 0, gameFrame.padding_up - gameFrame.border, gameFrame.width, gameFrame.height - gameFrame.padding_up + gameFrame.border);
         noFill();
-        stroke(Colors.dark_brown);
+        stroke(Colors.med_brown);
         strokeWeight(gameFrame.border);
-        // fix the border radius --> create a ratio for it
-        rect(gameFrame.border / 2, gameFrame.border / 2, width - gameFrame.border, height - gameFrame.border, 35);
+        rect(gameFrame.border / 2, gameFrame.border / 2, width - gameFrame.border, height - gameFrame.border, 0.025 * width);
         updateCatButtons();
         drawGrid();
 
@@ -136,17 +79,13 @@ export function GameScene() {
                     showLosingScreen();
                 }
 
-                sleepyCats.forEach((cat) => {
-                    if (cat.sprite.overlaps(currMouse.sprite)) {
+                activeCats.forEach((cat) => {
+                    if (cat instanceof SleepyCat && cat.sprite.overlaps(currMouse.sprite)) {
                         cat.awake = true;
                         cat.action(currMouse);
                     }
-                })
-
-                activeCats.forEach((cat) => {
-                    if (!(cat instanceof SleepyCat) && cat.sprite.overlaps(currMouse.sprite)) {
+                    else if (cat.sprite.overlaps(currMouse.sprite)) {
                         currMouse.targetCat = cat;
-                        console.log(`seting targetCat to ${currMouse.targetCat}`);
                     }
                 })
 
@@ -167,10 +106,8 @@ export function GameScene() {
     }
 
     this.exit = function() {
-        console.log(`i exit gameScene`);
-        console.log(allSprites);
         gameSprites.forEach((sprite) => sprite.remove());
-        activeCats.forEach((cat) => cat.remove());  // idk if it is needed or not
+        activeCats.forEach((cat) => cat.remove());
     }
 
     this.mousePressed = function() {
@@ -185,6 +122,7 @@ export function GameScene() {
                     activeCats.splice(index, 1);
                 }
                 grid[row][col] = null;
+                resetCatType();
             }
         }
 
@@ -203,15 +141,13 @@ export function GameScene() {
         }
 
         for (let i = 0; i < cheeses.length; i++) {
-            console.log(`there are ${cheeses.length} cheeses`)
-            // Calculate boundaries
+            // Calculate boundaries of the cheese
             let left = cheeses[i].x - cheeses[i].width / 2;
             let right = cheeses[i].x + cheeses[i].width / 2;
             let top = cheeses[i].y - cheeses[i].height / 2;
             let bottom = cheeses[i].y + cheeses[i].height / 2;
 
             if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
-                console.log(`cheese ${i} is pressed`)
                 updateCheeseCount(25);
                 cheeses[i].remove();
                 cheeses.splice(i, 1);
@@ -220,84 +156,93 @@ export function GameScene() {
         }
 
     }
+}
 
-    function drawGrid() {
-        for (let row = 0; row < gameFrame.rows; row++) {
-            for (let col = 0; col < gameFrame.cols; col++) {
-                let x = gameFrame.padding_left + col * gameFrame.tileWidth;
-                let y = gameFrame.padding_up + row * gameFrame.tileHeight;
+/**
+ * Resizes and styles UI containers and game canvas based on screen width
+ */
+function resizeFrame() {
+    gameParent.style.borderRadius = (0.03125 * width) + 'px';
+    canvas.style.borderRadius = (0.03125 * width) + 'px';
 
-                let isHovering = (
-                    mouseX > x && mouseX < x + gameFrame.tileWidth &&
-                    mouseY > y && mouseY < y + gameFrame.tileHeight
-                );
-                
-                if (isHovering && selectedCatType && selectedCatType === 'petCage' && grid[row][col] != null) fill('red');
-                else if (isHovering && selectedCatType && selectedCatType != 'petCage' && grid[row][col] == null) fill('red');
-                else fill((row + col) % 2 === 0 ? Colors.dark_yellow : Colors.light_yellow);
+    const gridHeight = gameFrame.rows * gameFrame.tileHeight;
+    upperContainer.style.width = width + 'px';
+    upperContainer.style.height = (gameFrame.height - gridHeight - gameFrame.border) + 'px';
+    upperContainer.style.borderRadius = (0.03125 * width) + 'px' + (0.03125 * width) + 'px 0 0';
 
-                noStroke();
-                rect(x, y, gameFrame.tileWidth, gameFrame.tileHeight);
+    controlPanel.style.margin = gameFrame.border + 'px';
+    controlPanel.style.marginRight = 0;
+    controlPanel.style.height = (gameFrame.height - gridHeight - 3 * gameFrame.border) + 'px';
+}
+
+/**
+ * Resets all game state variables and reinitializes the game board
+ */
+function resetGame() {
+    gameSprites.forEach((sprite) => sprite.remove());
+    activeCats = [];
+    activeMice = Array.from({ length: 5 }, () => []);
+    gameSprites = [];
+    robotVacuums = [];
+    cheeses = [];
+    grid = Array(5).fill().map(() => Array(9).fill(null));
+    levelMice = [...level1Mice];
+
+    startTime = millis() / 1000;
+    cheeseCount.textContent = 50;
+
+    catGroup = new Group();
+    mouseGroup = new Group();
+    throwableGroup = new Group();
+}
+
+/**
+ * Draws the tile grid on the game canvas
+ * Applies hover feedback based on selected cat type and grid cell state
+ */
+function drawGrid() {
+    for (let row = 0; row < gameFrame.rows; row++) {
+        for (let col = 0; col < gameFrame.cols; col++) {
+            let x = gameFrame.padding_left + col * gameFrame.tileWidth;
+            let y = gameFrame.padding_up + row * gameFrame.tileHeight;
+
+            let isHovering = (
+                mouseX > x && mouseX < x + gameFrame.tileWidth &&
+                mouseY > y && mouseY < y + gameFrame.tileHeight
+            );
+            
+            if (isHovering && selectedCatType && selectedCatType === 'petCage' && grid[row][col] != null) {
+                fill(Colors.med_brown);
             }
+            else if (isHovering && selectedCatType && selectedCatType != 'petCage' && grid[row][col] == null) {
+                fill(Colors.med_brown);
+            }
+            else fill((row + col) % 2 === 0 ? Colors.dark_yellow : Colors.light_yellow);
+
+            noStroke();
+            rect(x, y, gameFrame.tileWidth, gameFrame.tileHeight);
         }
     }
 }
 
-function updateCheeseCount(n) {
-    let currCheese = int(cheeseCount.textContent);
-    currCheese += n;
-    cheeseCount.textContent = currCheese;
-}
+/**
+ * Draws the left and right borders and the cheeseFeast loss-detection area
+ */
+function drawSideBars() {
+    leftBar = createSprite(gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
+    leftBar.color = Colors.med_brown;
+    leftBar.layer = 10;
+    leftBar.overlaps(allSprites);
+    gameSprites.push(leftBar);
 
-function spawnMouse(type, row) {
-    let x = width;
-    let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
-    
-    let newMouse = new createMouse(type, x, y, row);
-    if (newMouse) {
-        activeMice[row].push(newMouse);
-        if (type == 'bossMouse') {
-            if (row - 1 >= 0) activeMice[row - 1].push(newMouse);
-            if (row + 1 < gameFrame.rows) activeMice[row + 1].push(newMouse);
-        }
-        mouseGroup.add(newMouse.sprite);
-        gameSprites.push(newMouse.sprite);
-    }
-}
+    rightBar = createSprite(width - gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
+    rightBar.color = Colors.med_brown;
+    rightBar.layer = 10;
+    rightBar.overlaps(allSprites);
+    gameSprites.push(rightBar);
 
-export function updateProgressBar() {
-    miceKilled++;
-    const percentage = Math.floor((miceKilled / level1Mice.length) * 100);
-    gameProgress.value = percentage;
-
-    if (percentage >= 100) {
-        showWinningScreen();
-    }
-    console.log(`killed ${miceKilled} out of ${level1Mice.length}, % = ${percentage}`);
-}
-
-const catCosts = {
-    chefCat: 50,
-    singleYarnCat: 100,
-    doubleYarnCat: 200,
-    sleepyCat: 150,
-    iceCat: 150
-};
-
-function updateCatButtons() {
-    document.querySelectorAll('.catButton').forEach(button => {
-        const catType = button.id;
-        const cost = catCosts[catType];
-
-        if (parseInt(cheeseCount.textContent) < cost) {
-            button.disabled = true;
-            button.style.cursor = 'not-allowed';
-            button.style.opacity = '0.5';
-        }
-        else {
-            button.disabled = false;
-            button.style.opacity = '1';
-            button.style.cursor = 'pointer';
-        }
-    })
+    cheeseFeast = createSprite(gameFrame.tileWidth / 4, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.tileWidth / 2, gameFrame.tileHeight * 5);
+    cheeseFeast.opacity = 0;
+    cheeseFeast.overlaps(mouseGroup);
+    gameSprites.push(cheeseFeast)
 }

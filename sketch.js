@@ -2,8 +2,6 @@ import { StartScene } from './StartScene.js';
 import { GameScene } from './GameScene.js';
 
 export let mgr;
-const gameParent = document.getElementById('gameFrame');
-const startButton = document.getElementById('startButton');
 export let startPageAni;
 export const imageAssets = {};
 export const catImages = {};
@@ -11,7 +9,14 @@ export const catAnimation = {};
 export const mouseAnimation = {};
 export let selectedCatType = null;
 
+const gameParent = document.getElementById('gameFrame');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const quitButton = document.getElementById('quitButton');
+const quitGameButton = document.getElementById('quitGameButton');
+
 function preload() {
+    // Load all images and animations
     startPageAni = loadAni('assets/start_page_ani.png', {
         width: 1440, height: 1024, frames: 5
     });
@@ -22,7 +27,6 @@ function preload() {
     imageAssets.snowball = loadImage('assets/snowball.png');
     imageAssets.robotVacuum = loadImage('assets/robot_vacuum.png');
     imageAssets.gameBackground = loadImage('assets/game_background.png');
-    imageAssets.mouse = loadImage('assets/mouse.png');
     imageAssets.redExplosion = loadImage('assets/red_explosion.png');
     imageAssets.grayExplosion = loadImage('assets/gray_explosion.png');
 
@@ -45,6 +49,7 @@ function preload() {
 }
 
 function setup() {
+    // Set the canvas to #gameFrame
     const {width, height} = gameParent.getBoundingClientRect();
     
     const canvas = createCanvas(width, height);
@@ -53,9 +58,8 @@ function setup() {
 
     mgr.addScene(StartScene);
     mgr.addScene(GameScene);
-    //   mgr.addScene(PauseScene);
   
-    mgr.showScene(GameScene);
+    mgr.showScene(StartScene);
 }
 
 function draw() {
@@ -66,25 +70,33 @@ function mousePressed() {
   mgr.handleEvent("mousePressed");
 }
 
+/**
+ * Reset selectedCatType to null
+ */
 export function resetCatType() {
-    console.log(`reset is called`)
     selectedCatType = null;
     document.querySelectorAll('.catButton').forEach(button =>
         button.classList.remove('activeButton')
     );
 }
 
+// Add event listener to the buttons
 startButton.addEventListener('click', function (event) {
     event.preventDefault();
     mgr.showScene(GameScene);
 });
 
-menuButton.addEventListener('click', function (event) {
+restartButton.addEventListener('click', function (event) {
+    event.preventDefault();
+    mgr.showScene(GameScene);
+});
+
+quitButton.addEventListener('click', function (event) {
     event.preventDefault();
     mgr.showScene(StartScene);
 });
 
-quitButton.addEventListener('click', function (event) {
+quitGameButton.addEventListener('click', function (event) {
     event.preventDefault();
     mgr.showScene(StartScene);
 });
@@ -102,11 +114,8 @@ document.querySelectorAll('.catButton').forEach(button => {
             );
             button.classList.add('activeButton');
         }
-        console.log('Selected cat type:', selectedCatType);
     });
 });
-
-  
 
 window.preload = preload;
 window.setup = setup;
