@@ -1,13 +1,13 @@
-import { prototypeFrame, gameFrame } from './constants/Prototype.js';
-import { Colors } from './constants/Colors.js';
-import { imageAssets, selectedCatType, resetCatType } from './sketch.js';
-import { createCat, SleepyCat, throwables } from './classes/Cat.js';
-import { spawnMouse } from './classes/Mouse.js';
-import { drawRobotVacuums } from './classes/RobotVacuum.js';
-import { level1Mice } from './level/Level1.js';
-import { showLosingScreen } from './level/WinLose.js';
-import { updateCatButtons, updateCheeseCount, restartGameProgress } from './Controller.js';
-import { calculateCell, isCellValid } from './Helper.js';
+import { imageAssets, selectedCatType, resetCatType } from '../../sketch.js';
+import { prototypeFrame, gameFrame } from '../constants/Prototype.js';
+import { Colors } from '../constants/Colors.js';
+import { createCat, SleepyCat, throwables } from '../classes/Cat.js';
+import { spawnMouse } from '../classes/Mouse.js';
+import { drawRobotVacuums } from '../classes/RobotVacuum.js';
+import { level1Mice } from '../level/Level1.js';
+import { showLosingScreen } from '../level/WinLose.js';
+import { updateCatButtons, updateCheeseCount, restartGameProgress } from '../logic/Controller.js';
+import { calculateCell, isCellValid } from '../logic/Helper.js';
 
 const gameParent = document.getElementById('gameFrame');
 const upperContainer = document.getElementById('upperContainer');

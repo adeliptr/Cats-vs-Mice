@@ -1,5 +1,5 @@
-import { showWinningScreen } from './level/WinLose.js';
-import { level1Mice } from './level/Level1.js';
+import { level1Mice } from '../level/Level1.js';
+import { showWinningScreen } from '../level/WinLose.js';
 
 const cheeseCount = document.getElementById('cheeseCount');
 const gameProgress = document.getElementById('gameProgress');

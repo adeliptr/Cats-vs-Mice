@@ -1,4 +1,4 @@
-import { startPageAni } from './sketch.js';
+import { startPageAni } from '../../sketch.js';
 
 export function StartScene() {
     this.enter = function() {

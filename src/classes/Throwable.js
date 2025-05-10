@@ -1,6 +1,6 @@
+import { imageAssets } from '../../sketch.js';
 import { gameFrame } from '../constants/Prototype.js';
-import { imageAssets } from '../sketch.js';
-import { gameSprites } from '../GameScene.js';
+import { gameSprites } from '../scenes/GameScene.js';
 
 export class Throwable {
     constructor(x, y, point, img, width) {

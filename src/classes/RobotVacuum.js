@@ -1,6 +1,6 @@
+import { imageAssets } from '../../sketch.js';
 import { gameFrame } from '../constants/Prototype.js';
-import { imageAssets } from '../sketch.js';
-import { activeMice, catGroup, throwableGroup, gameSprites, robotVacuums } from '../GameScene.js';
+import { activeMice, catGroup, throwableGroup, gameSprites, robotVacuums } from '../scenes/GameScene.js';
 
 export class RobotVacuum {
     constructor(x, y, row) {

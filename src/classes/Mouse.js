@@ -1,7 +1,7 @@
+import { mouseAnimation } from '../../sketch.js';
 import { gameFrame } from '../constants/Prototype.js';
-import { mouseAnimation } from '../sketch.js';
-import { activeMice, mouseGroup, gameSprites } from '../GameScene.js';
-import { updateGameProgress } from '../Controller.js';
+import { activeMice, mouseGroup, gameSprites } from '../scenes/GameScene.js';
+import { updateGameProgress } from '../logic/Controller.js';
 import { Snowball } from './Throwable.js';
 
 const mouseAniDesc = {

@@ -1,4 +1,4 @@
-import { gameFrame } from "./constants/Prototype.js";
+import { gameFrame } from "../constants/Prototype.js";
 
 /**
  * Calculates the grid cell (row and column) corresponding to the given mouse coordinates

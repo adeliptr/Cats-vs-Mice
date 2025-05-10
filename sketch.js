@@ -1,5 +1,5 @@
-import { StartScene } from './StartScene.js';
-import { GameScene } from './GameScene.js';
+import { StartScene } from './src/scenes/StartScene.js';
+import { GameScene } from './src/scenes/GameScene.js';
 
 export let mgr;
 export let startPageAni;

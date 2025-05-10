@@ -1,8 +1,8 @@
+import { catAnimation, imageAssets } from '../../sketch.js';
 import { gameFrame } from '../constants/Prototype.js';
-import { catAnimation, imageAssets } from '../sketch.js';
-import { grid, cheeses, activeCats, activeMice, mouseGroup, throwableGroup, gameSprites } from '../GameScene.js';
+import { grid, cheeses, activeCats, activeMice, mouseGroup, throwableGroup, gameSprites } from '../scenes/GameScene.js';
+import { calculateCell } from '../logic/Helper.js';
 import { Yarn, Snowball } from './Throwable.js';
-import { calculateCell } from '../Helper.js';
 
 export const throwables = [];
 const catAniDesc = {
