@@ -45,6 +45,10 @@ export function updateCatButtons() {
     })
 }
 
+export function restartGameProgress() {
+    miceKilled = 0;
+}
+
 /**
  * Updates the game progress bar based on the number of mice killed
  * If all mice are killed, the win screen is triggered

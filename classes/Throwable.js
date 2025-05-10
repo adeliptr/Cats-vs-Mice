@@ -31,6 +31,6 @@ export class Yarn extends Throwable {
 // Snowball is thrown by IceCat
 export class Snowball extends Throwable {
     constructor(x, y) {
-        super(x, y, 20, imageAssets.snowball, gameFrame.tileWidth / 4);
+        super(x, y, 8, imageAssets.snowball, gameFrame.tileWidth / 4);
     }
 }

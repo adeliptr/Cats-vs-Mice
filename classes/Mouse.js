@@ -2,6 +2,7 @@ import { gameFrame } from '../constants/Prototype.js';
 import { mouseAnimation } from '../sketch.js';
 import { activeMice, mouseGroup, gameSprites } from '../GameScene.js';
 import { updateGameProgress } from '../Controller.js';
+import { Snowball } from './Throwable.js';
 
 const mouseAniDesc = {
     idle: { row: 0, frameSize: [200, 200] },
@@ -98,11 +99,16 @@ class Mouse {
      * Handles when the mouse is attacked and reduces its health
      * @param {number} point - The damage taken by the mouse
      */
-    attacked(point) {
-        this.HP -= point;
+    attacked(throwable) {
+        this.HP -= throwable.point;
         if (this.HP <= 0) this.remove();
         else {
             this.sprite.opacity = (this.HP / this.defaultHP) * 0.5 + 0.5;
+        }
+
+        if (throwable instanceof Snowball) {
+            this.defaultSpeed = min(-0.05, this.defaultSpeed + 0.02);
+            this.sprite.vel.x = this.defaultSpeed;
         }
     }
 }

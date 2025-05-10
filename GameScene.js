@@ -6,7 +6,7 @@ import { spawnMouse } from './classes/Mouse.js';
 import { drawRobotVacuums } from './classes/RobotVacuum.js';
 import { level1Mice } from './level/Level1.js';
 import { showLosingScreen } from './level/WinLose.js';
-import { updateCatButtons, updateCheeseCount } from './Controller.js';
+import { updateCatButtons, updateCheeseCount, restartGameProgress } from './Controller.js';
 import { calculateCell, isCellValid } from './Helper.js';
 
 const gameParent = document.getElementById('gameFrame');
@@ -60,6 +60,7 @@ export function GameScene() {
         updateCatButtons();
         drawGrid();
 
+        // Spawn Mouse at the designated time
         let currTime = millis() / 1000 - startTime;
 
         while (levelMice.length > 0 && levelMice[0].time <= currTime) {
@@ -67,9 +68,15 @@ export function GameScene() {
             spawnMouse(type, row);
         }
 
+        // Let each cat perform its action
         activeCats.forEach((cat) => cat.action());
 
-
+        // Detect collision or overlaps of mice to carry out the proper interaction
+        // Mouse - Cheese Feast: Game Over, the player lose the game
+        // Mouse - SleepyCat: SleepyCat will explode and be removed, Mouse will be attacked
+        // Mouse - other types of cats: the mouse will attack the cat
+        // Mouse - RobotVacuum: RobotVacuum will be activated and removed all activeMice in its row
+        // Mouse - Throwable: Mouse will be attacked by the Throwable (Yarn, Snowball)
         for (let row = 0; row < gameFrame.rows; row++) {
             for (let i = 0; i < activeMice[row].length; i++) {
                 const currMouse = activeMice[row][i];
@@ -97,7 +104,7 @@ export function GameScene() {
 
                 throwables.forEach((throwable) => {
                     if (throwable.sprite.overlaps(currMouse.sprite)) {
-                        currMouse.attacked(throwable.point);
+                        currMouse.attacked(throwable);
                         throwable.remove();
                     }
                 })
@@ -105,6 +112,7 @@ export function GameScene() {
         }
     }
 
+    // Remove all active sprites
     this.exit = function() {
         gameSprites.forEach((sprite) => sprite.remove());
         activeCats.forEach((cat) => cat.remove());
@@ -113,6 +121,7 @@ export function GameScene() {
     this.mousePressed = function() {
         const {row, col} = calculateCell(mouseX, mouseY);
 
+        // Remove an existing cat using the pet cage button
         if (isCellValid(row, col) && selectedCatType === 'petCage') {
             const cat = grid[row][col];
             if (cat) {
@@ -126,6 +135,7 @@ export function GameScene() {
             }
         }
 
+        // Placing a new cat
         else if (isCellValid(row, col) && grid[row][col] == null && selectedCatType != null) {
             let x = gameFrame.padding_left + col * gameFrame.tileWidth + gameFrame.tileWidth / 2;
             let y = gameFrame.padding_up + row * gameFrame.tileHeight + gameFrame.tileHeight / 2;
@@ -139,7 +149,8 @@ export function GameScene() {
                 resetCatType();
             }
         }
-
+        
+        // Detecting click on cheese to collect it and update the cheeseCount
         for (let i = 0; i < cheeses.length; i++) {
             // Calculate boundaries of the cheese
             let left = cheeses[i].x - cheeses[i].width / 2;
@@ -187,6 +198,7 @@ function resetGame() {
     cheeses = [];
     grid = Array(5).fill().map(() => Array(9).fill(null));
     levelMice = [...level1Mice];
+    restartGameProgress();
 
     startTime = millis() / 1000;
     cheeseCount.textContent = 50;
@@ -211,6 +223,7 @@ function drawGrid() {
                 mouseY > y && mouseY < y + gameFrame.tileHeight
             );
             
+            // Highlight the hovered grid if any action is possible with the currently selected button (selectedCatType)
             if (isHovering && selectedCatType && selectedCatType === 'petCage' && grid[row][col] != null) {
                 fill(Colors.med_brown);
             }
@@ -229,18 +242,21 @@ function drawGrid() {
  * Draws the left and right borders and the cheeseFeast loss-detection area
  */
 function drawSideBars() {
+    // Drawn so that the Mouse and RobotVacuum goes under the border
     leftBar = createSprite(gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
     leftBar.color = Colors.med_brown;
     leftBar.layer = 10;
     leftBar.overlaps(allSprites);
     gameSprites.push(leftBar);
 
+    // Drawn so that the Mouse and RobotVacuum goes under the border
     rightBar = createSprite(width - gameFrame.border / 2, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.border, gameFrame.tileHeight * 5);
     rightBar.color = Colors.med_brown;
     rightBar.layer = 10;
     rightBar.overlaps(allSprites);
     gameSprites.push(rightBar);
 
+    // Drawn to detect loss
     cheeseFeast = createSprite(gameFrame.tileWidth / 4, gameFrame.padding_up + gameFrame.tileHeight * 2.5, gameFrame.tileWidth / 2, gameFrame.tileHeight * 5);
     cheeseFeast.opacity = 0;
     cheeseFeast.overlaps(mouseGroup);
