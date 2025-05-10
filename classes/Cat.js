@@ -209,7 +209,6 @@ class DoubleYarnCat extends Cat {
         else this.switchToIdle();
 
         if (this.active && (millis() - this.lastShot > 3000)) {
-            // TODO: check on the offset again
             for (let offset of [0, 0.3 * gameFrame.tileWidth]) {
                 let yarnX = this.x + gameFrame.tileWidth / 2 + offset;
                 let yarnY = this.y;

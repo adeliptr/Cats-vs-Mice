@@ -36,11 +36,11 @@ function preload() {
     catImages.sleepyCat = loadImage('assets/sleepy_cat_icon.png');
     catImages.iceCat = loadImage('assets/ice_cat_icon.png');
 
-    catAnimation.chefCat = loadImage('assets/chef_cat_ani.png');
-    catAnimation.singleYarnCat = loadImage('assets/single_yarn_cat_ani.png');
-    catAnimation.doubleYarnCat = loadImage('assets/double_yarn_cat_ani.png');
-    catAnimation.sleepyCat = loadImage('assets/sleepy_cat_ani.png');
-    catAnimation.iceCat = loadImage('assets/ice_cat_ani.png');
+    catAnimation.chefCat = loadImage('assets/cat/chef_cat_ani.png');
+    catAnimation.singleYarnCat = loadImage('assets/cat/single_yarn_cat_ani.png');
+    catAnimation.doubleYarnCat = loadImage('assets/cat/double_yarn_cat_ani.png');
+    catAnimation.sleepyCat = loadImage('assets/cat/sleepy_cat_ani.png');
+    catAnimation.iceCat = loadImage('assets/cat/ice_cat_ani.png');
 
     mouseAnimation.basicMouse = loadImage('assets/mouse/basic_mouse_ani.png');
     mouseAnimation.helmetMouse = loadImage('assets/mouse/helmet_mouse_ani.png');

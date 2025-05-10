@@ -19,7 +19,7 @@ class Mouse {
      * @param {number} speed - The speed of the mouse's movement
      * @param {number} HP - The health points of the mouse
      * @param {number} AP - The attack power of the mouse
-     * @param {object} spriteSheet - The sprite sheet for the mouse animation
+     * @param {p5.SpriteSheet} spriteSheet - The sprite sheet for the mouse animation
      * @param {number} size - The size of the mouse sprite
      */
     constructor(row, speed, HP, AP, spriteSheet, size) {
@@ -111,8 +111,8 @@ class Mouse {
  * Basic type of mouse
  */
 class BasicMouse extends Mouse {
-    constructor(x, y, row) {
-        super(x, y, row, -0.15, 100, 20, mouseAnimation.basicMouse, gameFrame.tileWidth);
+    constructor(row) {
+        super(row, -0.15, 100, 20, mouseAnimation.basicMouse, gameFrame.tileWidth);
     }
 }
 
@@ -121,8 +121,8 @@ class BasicMouse extends Mouse {
  * Has a higher HP compared to BasicMouse
  */
 class HelmetMouse extends Mouse {
-    constructor(x, y, row) {
-        super(x, y, row, -0.15, 150, 20, mouseAnimation.helmetMouse, gameFrame.tileWidth);
+    constructor(row) {
+        super(row, -0.15, 150, 20, mouseAnimation.helmetMouse, gameFrame.tileWidth);
     }
 }
 
@@ -131,8 +131,8 @@ class HelmetMouse extends Mouse {
  * Has a higher speed compared to Basic Mouse
  */
 class SportyMouse extends Mouse {
-    constructor(x, y, row) {
-        super(x, y, row, -0.3, 85, 20, mouseAnimation.sportyMouse, gameFrame.tileWidth);
+    constructor(row) {
+        super(row, -0.3, 85, 20, mouseAnimation.sportyMouse, gameFrame.tileWidth);
     }
 }
 
@@ -142,8 +142,8 @@ class SportyMouse extends Mouse {
  * Has a slower speed compared to the other types
  */
 class BossMouse extends Mouse {
-    constructor(x, y, row) {
-        super(x, y, row, -0.05, 1000, 50, mouseAnimation.bossMouse, 3 * gameFrame.tileWidth);
+    constructor(row) {
+        super(row, -0.05, 1000, 50, mouseAnimation.bossMouse, 3 * gameFrame.tileWidth);
     }
 }
 
