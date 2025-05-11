@@ -250,7 +250,8 @@ export class SleepyCat extends Cat {
 
         if (this.wakeStart != undefined) {
             if (!this.hasAttacked && this.targetMouse && millis() - this.wakeStart > 900) {
-                this.targetMouse.attacked(150);
+                const explode = { point: 150 };
+                this.targetMouse.attacked(explode);
                 if (this.targetMouse && this.targetMouse.HP > 0) this.targetMouse.sprite.changeAni('walk');
                 this.hasAttacked = true;
             }
