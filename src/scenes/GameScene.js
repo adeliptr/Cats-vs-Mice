@@ -10,6 +10,7 @@ import { updateCatButtons, updateCheeseCount, restartGameProgress } from '../log
 import { calculateCell, isCellValid } from '../logic/Helper.js';
 
 const gameParent = document.getElementById('gameFrame');
+const endingOverlay = document.getElementById('endingOverlay');
 const upperContainer = document.getElementById('upperContainer');
 const controlPanel = document.getElementById('controlPanel');
 const cheeseCount = document.getElementById('cheeseCount');
@@ -175,6 +176,7 @@ export function GameScene() {
 function resizeFrame() {
     gameParent.style.borderRadius = (0.03125 * width) + 'px';
     canvas.style.borderRadius = (0.03125 * width) + 'px';
+    endingOverlay.style.borderRadius = (0.03125 * width) + 'px';
 
     const gridHeight = gameFrame.rows * gameFrame.tileHeight;
     upperContainer.style.width = width + 'px';

@@ -4,7 +4,6 @@ import { GameScene } from './src/scenes/GameScene.js';
 export let mgr;
 export let startPageAni;
 export const imageAssets = {};
-export const catImages = {};
 export const catAnimation = {};
 export const mouseAnimation = {};
 export let selectedCatType = null;
@@ -29,12 +28,6 @@ function preload() {
     imageAssets.gameBackground = loadImage('assets/game_background.png');
     imageAssets.redExplosion = loadImage('assets/red_explosion.png');
     imageAssets.grayExplosion = loadImage('assets/gray_explosion.png');
-
-    catImages.chefCat = loadImage('assets/chef_cat_icon.png');
-    catImages.singleYarnCat = loadImage('assets/single_yarn_cat_icon.png');
-    catImages.doubleYarnCat = loadImage('assets/double_yarn_cat_icon.png');
-    catImages.sleepyCat = loadImage('assets/sleepy_cat_icon.png');
-    catImages.iceCat = loadImage('assets/ice_cat_icon.png');
 
     catAnimation.chefCat = loadImage('assets/cat/chef_cat_ani.png');
     catAnimation.singleYarnCat = loadImage('assets/cat/single_yarn_cat_ani.png');
