@@ -4,7 +4,10 @@
 Name        : Adelia Putri  
 Student ID  : 20210782  
 Email       : adelia@kaist.ac.kr  
-Git Repository: [Cats vs. Mice Repository](https://github.com/adeliptr/Cats-vs-Mice)  
+Git Repository:  
+- [Gitea | Cats vs. Mice](http://git.prototyping.id/20210782/Cats-vs-Mice)  
+- [Github | Cats vs. Mice](https://github.com/adeliptr/Cats-vs-Mice)  
+
 Demo Video: [Cats vs. Mice Demo Video](https://youtu.be/wxM7zTX4wvc)
 
 ## 📚 Table of Content
